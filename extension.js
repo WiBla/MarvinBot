@@ -25,22 +25,18 @@
         }
 
         bot.commands.blocopCommand = {
-            command: 'blocop',  // The command to be called. With the standard command literal this would be: !bacon
-            rank: 'user', // Minimum user permission to use the command
-            type: 'exact', // Specify if it can accept variables or not (if so, these have to be handled yourself through the chat.message
+            command: 'blocop',
+            rank: 'user',
+            type: '',
               functionality: function (chat, cmd) {
                     if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!basicBot.commands.executable(this.rank, chat)) return void (0);
+                    if (!bot.commands.executable(this.rank, chat)) return void (0);
                     else {
                         var msg = chat.message;
-                        if (msg.length === cmd.length) return API.sendChat(subChat(basicBot.chat.nouserspecified, {name: chat.un}));
-                        var name = msg.substr(cmd.length + 2);
-                        var user = basicBot.userUtilities.lookupUserName(name);
-                        if (msg.length > cmd.length + 2) {
-                            if (typeof user !== 'undefined') {
-                                API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes" + name + ".");
-                            }
-                            else API.sendChat(subChat(basicBot.chat.invaliduserspecified, {name: chat.un}));
+                        if (msg.length === cmd.length) return void (0);
+                        var name = msg.substr(cmd.length + 1);
+                        if (msg.length > cmd.length + 1) {
+                            API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes" + name + ".");
                         }
                     }
                 }
@@ -63,7 +59,7 @@
       startupVolume: 0, // 0-100
       startupEmoji: false, // true or false
       autowoot: true,
-      autoskip: false,
+      autoskip: true,
       smartSkip: true,
       cmdDeletion: true,
       maximumAfk: 240,
@@ -80,7 +76,7 @@
       voteSkipLimit: 5,
       historySkip: true,
       timeGuard: true,
-      maximumSongLength: 8.15,
+      maximumSongLength: 7.15,
       autodisable: false,
       commandCooldown: 30,
       usercommandsEnabled: true,
@@ -107,7 +103,7 @@
       themeLink: null,
       fbLink: null,
       youtubeLink: null,
-      website: "http://wibla.free.fr",
+      website: "http://wibla.free.fr/plug",
       intervalMessages: [],
       messageInterval: 5,
       songstats: true,
