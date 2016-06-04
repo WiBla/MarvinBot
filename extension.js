@@ -24,18 +24,26 @@
           window.bot.chatUtilities.spam.push(spamWords[i]);
         }
 
-        // Example code for a bot command:
-        bot.commands.baconCommand = {
-            command: 'bacon',  // The command to be called. With the standard command literal this would be: !bacon
+        bot.commands.blocopCommand = {
+            command: 'blocop',  // The command to be called. With the standard command literal this would be: !bacon
             rank: 'user', // Minimum user permission to use the command
             type: 'exact', // Specify if it can accept variables or not (if so, these have to be handled yourself through the chat.message
               functionality: function (chat, cmd) {
-                if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                if (!bot.commands.executable(this.rank, chat)) return void (0);
-                else {
-                  API.sendChat("/me Bacon!!!");
+                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                    if (!basicBot.commands.executable(this.rank, chat)) return void (0);
+                    else {
+                        var msg = chat.message;
+                        if (msg.length === cmd.length) return API.sendChat(subChat(basicBot.chat.nouserspecified, {name: chat.un}));
+                        var name = msg.substr(cmd.length + 2);
+                        var user = basicBot.userUtilities.lookupUserName(name);
+                        if (msg.length > cmd.length + 2) {
+                            if (typeof user !== 'undefined') {
+                                API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes" + name + ".");
+                            }
+                            else API.sendChat(subChat(basicBot.chat.invaliduserspecified, {name: chat.un}));
+                        }
+                    }
                 }
-              }
             };
 
         // Load the chat package again to account for any changes
