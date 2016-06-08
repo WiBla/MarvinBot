@@ -36,7 +36,7 @@
                         if (msg.length === cmd.length) return void (0);
                         var name = msg.substr(cmd.length + 1);
                         if (msg.length > cmd.length + 1) {
-                            API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes" + name + ".");
+                            API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes " + name + ".");
                         }
                     }
                 }
@@ -98,9 +98,9 @@
       filterChat: true,
       etaRestriction: false,
       welcome: true,
-      opLink: null,
-      rulesLink: null,
-      themeLink: null,
+      opLink: "http://wibla.free.fr/plug/room#op",
+      rulesLink: "http://wibla.free.fr/plug/rules",
+      themeLink: "https://rawgit.com/Plug-It/pi/master/ressources/blue.css",
       fbLink: null,
       youtubeLink: null,
       website: "http://wibla.free.fr/plug",
@@ -109,9 +109,9 @@
       songstats: true,
       commandLiteral: "!",
       blacklists: {
-        NSFW: "https://rawgit.com/bscBot/custom/master/blacklists/NSFWlist.json",
-        OP: "https://rawgit.com/bscBot/custom/master/blacklists/OPlist.json",
-        BANNED: "https://rawgit.com/bscBot/custom/master/blacklists/BANNEDlist.json"
+        NSFW: null,
+        OP: "https://rawgit.com/WiBla/custom/master/blacklists/OPlist.json",
+        BANNED: "https://rawgit.com/WiBla/custom/master/blacklists/BANNEDlist.json"
       }
     }));
 
