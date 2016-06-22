@@ -28,19 +28,43 @@
             command: 'blocop',
             rank: 'user',
             type: '',
-              functionality: function (chat, cmd) {
-                    if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                    if (!bot.commands.executable(this.rank, chat)) return void (0);
-                    else {
-                        var msg = chat.message;
-                        if (msg.length === cmd.length) return void (0);
-                        var name = msg.substr(cmd.length + 1);
-                        if (msg.length > cmd.length + 1) {
-                            API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes " + name + ".");
-                        }
+            functionality: function (chat, cmd) {
+                if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                if (!bot.commands.executable(this.rank, chat)) return void (0);
+                else {
+                    var msg = chat.message;
+                    if (msg.length === cmd.length) return void (0);
+                    var name = msg.substr(cmd.length + 1);
+                    if (msg.length > cmd.length + 1) {
+                        API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes " + name + ".");
                     }
                 }
-            };
+            }
+        };
+        bot.commands.gifCommand = {
+            command: 'gif',
+            rank: 'user',
+            type: 'exact',
+            functionality: function (chat, cmd) {
+                if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                if (!bot.commands.executable(this.rank, chat)) return void (0);
+                else {
+                    return void (0);
+                }
+            }
+        };
+        bot.commands.gifCommand = {
+            command: 'giphy',
+            rank: 'user',
+            type: 'exact',
+            functionality: function (chat, cmd) {
+                if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+                if (!bot.commands.executable(this.rank, chat)) return void (0);
+                else {
+                    return void (0);
+                }
+            }
+        };
 
         // Load the chat package again to account for any changes
         bot.loadChat();
