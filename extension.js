@@ -2,6 +2,8 @@
 
     // Change this to your GitHub username so you don't have to modify so many things.
     var fork = "WiBla";
+    var gifCooldown = new Date();
+    gifCooldown = gifCooldown.getTime();
 
     // Define our function responsible for extending the bot.
     function extend() {
@@ -19,15 +21,15 @@
         //Extend the bot here, either by calling another function or here directly.
 
         // You can add more spam words to the bot.
-        var spamWords = ['spam1', 'spam2', 'spam3', 'spam4'];
+        var spamWords = ['skip'];
         for (var i = 0; i < spamWords.length; i++) {
           window.bot.chatUtilities.spam.push(spamWords[i]);
         }
 
-        bot.commands.blocopCommand = {
+        bot.commands.blocop = {
             command: 'blocop',
             rank: 'user',
-            type: '',
+            type: 'startsWith',
             functionality: function (chat, cmd) {
                 if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                 if (!bot.commands.executable(this.rank, chat)) return void (0);
@@ -41,27 +43,74 @@
                 }
             }
         };
+        // Redefining gifCommand to be bouncer min and with 60s cooldown
         bot.commands.gifCommand = {
-            command: 'gif',
-            rank: 'user',
-            type: 'exact',
+            command: ['gif', 'giphy'],
+            rank: 'bouncer',
+            type: 'startsWith',
             functionality: function (chat, cmd) {
                 if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
                 if (!bot.commands.executable(this.rank, chat)) return void (0);
+                if ((new Date().getTime() - gifCooldown)/1000/60 < 1) return void (0); // if less than a minute
                 else {
-                    return void (0);
-                }
-            }
-        };
-        bot.commands.gifCommand = {
-            command: 'giphy',
-            rank: 'user',
-            type: 'exact',
-            functionality: function (chat, cmd) {
-                if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-                if (!bot.commands.executable(this.rank, chat)) return void (0);
-                else {
-                    return void (0);
+                    gifCooldown = new Date().getTime();
+                    var msg = chat.message;
+                    if (msg.length !== cmd.length) {
+                        function get_id(api_key, fixedtag, func)
+                        {
+                            $.getJSON(
+                                "https://tv.giphy.com/v1/gifs/random?",
+                                {
+                                    "format": "json",
+                                    "api_key": api_key,
+                                    "rating": rating,
+                                    "tag": fixedtag
+                                },
+                                function(response)
+                                {
+                                    func(response.data.id);
+                                }
+                                )
+                        }
+                        var api_key = "dc6zaTOxFJmzC"; // public beta key
+                        var rating = "pg-13"; // PG 13 gifs
+                        var tag = msg.substr(cmd.length + 1);
+                        var fixedtag = tag.replace(/ /g,"+");
+                        var commatag = tag.replace(/ /g,", ");
+                        get_id(api_key, tag, function(id) {
+                            if (typeof id !== 'undefined') {
+                                API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Tags: '+commatag+']');
+                            } else {
+                                API.sendChat('/me ['+chat.un+'] Invalid tags, try something different. [Tags: '+commatag+']');
+                            }
+                        });
+                    }
+                    else {
+                        function get_random_id(api_key, func)
+                        {
+                            $.getJSON(
+                                "https://tv.giphy.com/v1/gifs/random?",
+                                {
+                                    "format": "json",
+                                    "api_key": api_key,
+                                    "rating": rating
+                                },
+                                function(response)
+                                {
+                                    func(response.data.id);
+                                }
+                                )
+                        }
+                        var api_key = "dc6zaTOxFJmzC"; // public beta key
+                        var rating = "pg-13"; // PG 13 gifs
+                        get_random_id(api_key, function(id) {
+                            if (typeof id !== 'undefined') {
+                                API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Random GIF]');
+                            } else {
+                                API.sendChat('/me ['+chat.un+'] Invalid request, try again.');
+                            }
+                        });
+                    }
                 }
             }
         };
@@ -72,7 +121,6 @@
       }
 
     //Change the bots default settings and make sure they are loaded on launch
-
     localStorage.setItem("basicBotsettings", JSON.stringify({
       botName: "marvinBot",
       language: "english",
@@ -81,7 +129,7 @@
       roomLock: false, // Requires an extension to re-load the script
       startupCap: 1, // 1-200
       startupVolume: 0, // 0-100
-      startupEmoji: false, // true or false
+      startupEmoji: true, // true or false
       autowoot: true,
       autoskip: true,
       smartSkip: true,
@@ -128,8 +176,10 @@
       fbLink: null,
       youtubeLink: null,
       website: "http://wibla.free.fr/plug",
-      intervalMessages: [],
-      messageInterval: 5,
+      intervalMessages: [
+        "Join the discord: https://discord.gg/cXPG83s"
+      ],
+      messageInterval: 10,
       songstats: true,
       commandLiteral: "!",
       blacklists: {
