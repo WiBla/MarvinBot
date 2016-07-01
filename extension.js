@@ -13,23 +13,6 @@
 			window.bot.chatUtilities.spam.push(spamWords[i]);
 		}
 
-		bot.commands.blocop = {
-			command: 'blocop',
-			rank: 'user',
-			type: 'startsWith',
-			functionality: function (chat, cmd) {
-				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-				if (!bot.commands.executable(this.rank, chat)) return void (0);
-				else {
-					var msg = chat.message;
-					if (msg.length === cmd.length) return API.sendChat("No user specified");
-					var name = msg.substr(cmd.length + 1);
-					if (msg.length > cmd.length + 1) {
-						API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes " + name + ".");
-					}
-				}
-			}
-		};
 		// Redefining gifCommand to be bouncer min and with 60s cooldown
 		bot.commands.gifCommand = {
 			command: ['gif', 'giphy'],
@@ -101,6 +84,74 @@
 				}
 			}
 		};
+		// Redefine kick to use ajax
+		bot.commands.kickCommand = {
+			command: 'kick',
+			rank: 'bouncer',
+			type: 'startsWith',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					var msg = chat.message;
+					var lastSpace = msg.lastIndexOf(' ');
+					var time;
+					var name;
+					if (lastSpace === msg.indexOf(' ')) {
+						time = 15;
+						name = msg.substring(cmd.length + 2);
+					}
+					else {
+						time = msg.substring(lastSpace + 1);
+						name = msg.substring(cmd.length + 2, lastSpace);
+					}
+
+					var user = null;
+					var users = API.getUsers();
+					for (var i = 0; i < users.length; i++) {
+						var match = users[i].username.trim() == name.trim();
+						if (match) {
+							user = users[i];
+						}
+					}
+					
+					var from = chat.un;
+					if (typeof user == 'null') return API.sendChat('/me [@'+chat.un+'] No user specified.');
+
+					var permFrom = API.getUser(chat.uid).role;
+					var permTokick = API.getUser(user.id).role;
+					if (permFrom <= permTokick) return API.sendChat('/me [@'+chat.un+'] you can\'t kick users with an equal or higher rank than you!');
+
+					if (!isNaN(time)) {
+						var duration;
+						if (time>=24*60*60) duration = 'f';
+						else if (time>=60*60) duration = 'd';
+						else duration = 'h';
+						$.ajax({
+							type: 'POST',
+							url: 'https://plug.dj/_/bans/add',
+							data: JSON.stringify({'userID':user.id,'reason':1,'duration':duration}),
+							dataType: 'json',
+							contentType: 'application/json',
+							error: function(e) {console.log(e);},
+							success: function(){
+								API.sendChat('/me '+user.username+' was kicked for '+time+' seconds.');
+								setTimeout(function(){
+									$.ajax({
+										type: 'DELETE',
+										url: 'https://plug.dj/_/bans/'+user.id,
+										error: function(e) {console.log(e);},
+										success: function(){
+											API.sendChat('/me '+user.username+' was successfully unbaned.');
+										}
+									});
+								}, time*1000);
+							}
+						});
+					} else API.sendChat('/me [@'+chat.un+'] Invalid time specified');
+				}
+			}
+		},
 		// Tell someone "I'm a bot"
 		bot.commands.bot = {
 			command: 'bot',
@@ -115,6 +166,28 @@
 					var name = msg.substr(cmd.length + 1);
 					if (msg.length > cmd.length + 1) {
 						API.sendChat("/me " + name + ", I am a bot, you can try to talk to me but I won't answer unless you use commands.");
+					}
+				}
+			}
+		};
+		bot.commands.blocop = {
+			command: 'blocop',
+			rank: 'user',
+			type: 'startsWith',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					var msg = chat.message;
+					if (msg.length === cmd.length) return API.sendChat("No user specified");
+
+					var name = msg.substr(cmd.length + 1);
+					if (name.length > 0) {
+						var audience = API.getUsers();
+			      for (var i = 0; i < audience.length; i++) {
+			        if (audience[i].rawun.toLowerCase() == name) return API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes " + name + ".");;
+			      }
+						API.sendChat("There is no user by this name.");
 					}
 				}
 			}
