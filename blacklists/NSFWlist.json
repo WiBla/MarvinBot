@@ -1,13 +1,16 @@
 {
-    "1":{
-        "mid": "1:NSFWsongID1"
+    "0": {
+        "title":  null,
+        "author": null,
+        "reason": null,
+        "since":  null,
+        "mid":    null
     },
-    "2":{
-        "title": "This is a NSFW song",
-        "author": "The NSFW band",
-        "mid": "1:NSFWsongID2"
-    },
-    "3":{
-        "mid": "1:NSFWsongID3"
+    "1": {
+        "title":  "The NSFW list is not used",
+        "author": "The NSFW list is not used",
+        "reason": "The NSFW list is not used",
+        "since":  "The NSFW list is not used",
+        "mid":    "The NSFW list is not used"
     }
 }

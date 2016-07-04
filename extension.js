@@ -179,15 +179,15 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
 					var msg = chat.message;
-					if (msg.length === cmd.length) return API.sendChat("No user specified");
+					if (msg.length === cmd.length) return API.sendChat('/me [@'+chat.un+'] No user specified');
 
-					var name = msg.substr(cmd.length + 1);
+					var name = msg.substr(cmd.length + 1).replace('@','');
 					if (name.length > 0) {
 						var audience = API.getUsers();
 			      for (var i = 0; i < audience.length; i++) {
-			        if (audience[i].rawun.toLowerCase() == name) return API.sendChat("/me Le bloc opératoire N°404 est disponible pour une ablation de côtes " + name + ".");;
+			        if (audience[i].rawun == name) return API.sendChat('/me Le bloc opératoire N°404 est disponible pour une ablation de côtes ' + name + '.');;
 			      }
-						API.sendChat("There is no user by this name.");
+						API.sendChat('/me [@'+chat.un+'] There is no user by this name.');
 					}
 				}
 			}
@@ -199,7 +199,7 @@
 	localStorage.setItem("basicBotsettings", JSON.stringify({
 		botName: "MarvinBot",
 		language: "english",
-		chatLink: "https://rawgit.com/bscBot/source/master/lang/en.json",
+		chatLink: "https://rawgit.com/WiBla/custom/master/lang/en.json",
 		scriptLink: "https://rawgit.com/bscBot/source/master/basicBot.js",
 		roomLock: false,
 		startupCap: 1,
