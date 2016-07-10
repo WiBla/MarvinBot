@@ -5,12 +5,5 @@
         "reason": null,
         "since":  null,
         "mid":    null
-    },
-    "1": {
-        "title":  "Test",
-        "author": "Test",
-        "reason": "Test",
-        "since":  "Test",
-        "mid":    "Test"
     }
 }

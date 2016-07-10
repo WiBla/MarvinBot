@@ -1,7 +1,6 @@
 (function(){
 	var fork = "WiBla";
-	var gifCooldown = new Date();
-	gifCooldown = gifCooldown.getTime();
+	var gifCooldown = new Date().getTime();
 
 	function extend() {
 		if (!window.bot) return setTimeout(extend, 1 * 1000);
@@ -252,7 +251,7 @@
 		youtubeLink: null,
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
-			"Join the discord: https://discord.gg/cXPG83s"
+			"Join the discord: https://discord.gg/eJGAVBT"
 		],
 		messageInterval: 10,
 		songstats: true,
