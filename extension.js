@@ -1,6 +1,7 @@
 (function(){
 	var fork = "WiBla";
 	var gifCooldown = new Date().getTime();
+	var settings = JSON.parse(localStorage.getItem("basicBotsettings"));
 
 	function extend() {
 		if (!window.bot) return setTimeout(extend, 1 * 1000);
@@ -191,6 +192,23 @@
 				}
 			}
 		};
+		// Fixing voteSkip
+		API.on(API.SCORE_UPDATE, function(){
+			var voteskip = settings.voteSkip;
+			var voteSkipLimit = settings.voteSkipLimit;
+
+			if (voteskip && API.getScore().negative >= voteSkipLimit) {
+				API.sendChat("/me Too many mehs, skipping..");
+				API.moderateForceSkip()
+			}
+		});
+		// Auto skip songs with 'nightcore' in title as it's not allowed
+		API.on(API.ADVANCE, function(e){
+			if (e.media.title.toLowerCase().search('nightcore') != -1 || e.media.author.toLowerCase().search('nightcore') != -1) {
+				API.sendChat('/me [@'+e.dj.rawun+'] nightcore is not allowed. Skipping..');
+				API.moderateForceSkip()
+			}
+		});
 
 		bot.loadChat();
 	}
@@ -210,19 +228,19 @@
 		cmdDeletion: true,
 		maximumAfk: 240,
 		afkRemoval: false,
-		maximumDc: 60,
+		maximumDc: 120,
 		bouncerPlus: true,
 		blacklistEnabled: true,
 		lockdownEnabled: false,
 		lockGuard: false,
 		maximumLocktime: 10,
-		cycleGuard: false,
-		maximumCycletime: 10,
+		cycleGuard: true,
+		maximumCycletime: 30,
 		voteSkip: true,
 		voteSkipLimit: 5,
 		historySkip: true,
 		timeGuard: true,
-		maximumSongLength: 7.25,
+		maximumSongLength: 7.5,
 		autodisable: false,
 		commandCooldown: 30,
 		usercommandsEnabled: true,
@@ -236,17 +254,17 @@
 			["nsfw", "The song you contained was NSFW (image or sound). "],
 			["unavailable", "The song you played was not available for some users. "]
 		],
-		afkpositionCheck: 15,
-		afkRankCheck: "user",
+		afkpositionCheck: 0,
+		afkRankCheck: "admin",
 		motdEnabled: false,
 		motdInterval: 10,
 		motd: "",
 		filterChat: false,
-		etaRestriction: false,
+		etaRestriction: true,
 		welcome: true,
 		opLink: "http://wibla.free.fr/plug/room#op",
 		rulesLink: "http://wibla.free.fr/plug/rules",
-		themeLink: null,
+		themeLink: "http://wibla.free.fr/plug/rules#9",
 		fbLink: null,
 		youtubeLink: null,
 		website: "http://wibla.free.fr/plug",
