@@ -152,6 +152,25 @@
 				}
 			}
 		},
+		// Fixing link cmd to display soundcloud links
+		bot.commands.linkCommand = {
+			command: 'link',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					var thisMedia = API.getMedia();
+					if (thisMedia.format == 1) API.sendChat('/me ['+chat.un+'] Link to current song: https://youtu.be/'+thisMedia.cid);
+					else {
+					  var sound = SC.get('/tracks/' + thisMedia.cid);
+					  // setTimeout is used because SC doesn't return immediately the track
+					  setTimeout(function(){API.sendChat('/me ['+chat.un+'] Link to current song: '+sound['_result'].permalink_url);}, 1000);
+					}
+				}
+			}
+		},
 		// Tell someone "I'm a bot"
 		bot.commands.bot = {
 			command: 'bot',
