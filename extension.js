@@ -151,7 +151,7 @@
 					} else API.sendChat('/me [@'+chat.un+'] Invalid time specified');
 				}
 			}
-		},
+		};
 		// Fixing link cmd to display soundcloud links
 		bot.commands.linkCommand = {
 			command: 'link',
@@ -162,15 +162,15 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
 					var thisMedia = API.getMedia();
-					if (thisMedia.format == 1) API.sendChat('/me ['+chat.un+'] Link to current song: https://youtu.be/'+thisMedia.cid);
+					if (thisMedia.format == 1) API.sendChat('/me [@'+chat.un+'] Link to current song: https://youtu.be/'+thisMedia.cid);
 					else {
-					  var sound = SC.get('/tracks/' + thisMedia.cid);
+						var sound = SC.get('/tracks/' + thisMedia.cid);
 					  // setTimeout is used because SC doesn't return immediately the track
-					  setTimeout(function(){API.sendChat('/me ['+chat.un+'] Link to current song: '+sound['_result'].permalink_url);}, 1000);
+					  setTimeout(function(){API.sendChat('/me [@'+chat.un+'] Link to current song: '+sound['_result'].permalink_url);}, 1000);
 					}
 				}
 			}
-		},
+		};
 		// Tell someone "I'm a bot"
 		bot.commands.bot = {
 			command: 'bot',
@@ -203,9 +203,9 @@
 					var name = msg.substr(cmd.length + 1).replace('@','');
 					if (name.length > 0) {
 						var audience = API.getUsers();
-			      for (var i = 0; i < audience.length; i++) {
-			        if (audience[i].rawun == name) return API.sendChat('/me Le bloc opératoire N°404 est disponible pour une ablation de côtes ' + name + '.');;
-			      }
+						for (var i = 0; i < audience.length; i++) {
+							if (audience[i].rawun == name) return API.sendChat('/me Le bloc opératoire N°404 est disponible pour une ablation de côtes ' + name + '.');;
+						}
 						API.sendChat('/me [@'+chat.un+'] There is no user by this name.');
 					}
 				}
@@ -225,8 +225,26 @@
 		API.on(API.ADVANCE, function(e){
 			if (e.media.title.toLowerCase().search('nightcore') != -1 || e.media.author.toLowerCase().search('nightcore') != -1) {
 				API.sendChat('/me [@'+e.dj.rawun+'] nightcore is not allowed. Skipping..');
-				API.moderateForceSkip()
+				API.moderateForceSkip();
 			}
+		});
+		// Export all chat since bot has been loaded into a log.txt
+		API.on(API.CHAT_COMMAND, function(cmd){
+			if (cmd == '/exportchat') {
+				var logs = JSON.parse(localStorage.getItem('basicBotRoom'));
+				logs = logs.chatMessages;
+
+				var log = '';
+				for (var i=0; i<logs.length; i++) {
+				  log += '['+logs[i].join('] [')+']\n';
+				}
+
+				var dl = document.createElement('a');
+				dl.href = 'data:attachment/text,' + encodeURI(log);
+				dl.target = '_blank';
+				dl.download = 'log.txt';
+				dl.click();
+		  }
 		});
 
 		bot.loadChat();
@@ -265,13 +283,13 @@
 		usercommandsEnabled: true,
 		skipPosition: 3,
 		skipReasons: [
-			["theme", "This song does not fit the room theme. "],
-			["op", "This song is on the OP list. "],
-			["history", "This song is in the history. "],
-			["mix", "You played a mix, which is against the rules. "],
-			["sound", "The song you played had bad sound quality or no sound. "],
-			["nsfw", "The song you contained was NSFW (image or sound). "],
-			["unavailable", "The song you played was not available for some users. "]
+		["theme", "This song does not fit the room theme. "],
+		["op", "This song is on the OP list. "],
+		["history", "This song is in the history. "],
+		["troll", "The song you played was a troll. "],
+		["sound", "The song you played had bad sound quality or no sound. "],
+		["nsfw", "The song you played contained NSFW image/sound. "],
+		["unavailable", "The song you played was not available for some users. "]
 		],
 		afkpositionCheck: 0,
 		afkRankCheck: "admin",
@@ -283,12 +301,12 @@
 		welcome: true,
 		opLink: "http://wibla.free.fr/plug/room#op",
 		rulesLink: "http://wibla.free.fr/plug/rules",
-		themeLink: "http://wibla.free.fr/plug/rules#9",
+		themeLink: "http://a2.files.magneticmag.com/image/upload/c_fill,cs_srgb,q_60,w_768/MTMzNzAxMTUzMjI0NDAzNTg3.png",
 		fbLink: null,
 		youtubeLink: null,
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
-			"Join the discord: https://discord.gg/eJGAVBT"
+		"Join the discord: https://discord.gg/eJGAVBT"
 		],
 		messageInterval: 10,
 		songstats: true,
