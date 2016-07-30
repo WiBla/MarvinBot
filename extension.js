@@ -171,6 +171,23 @@
 				}
 			}
 		};
+		// Improving clearlocalstorage to save plug settings, send a chat message and reload automaticaly
+		bot.commands.clearlocalstorageCommand: {
+			command: 'clearLS',
+			rank: 'manager',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!basicBot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					var plugSettings = localStorage.getItem('settings');
+					localStorage.clear();
+					localStorage.setItem('settings', plugSettings);
+					API.sendChat('/me [@'+chat.un+'] localStorage cleared ! Be right back..');
+					location.reload();
+				}
+			}
+		};
 		// Tell someone "I'm a bot"
 		bot.commands.bot = {
 			command: 'bot',
@@ -283,13 +300,13 @@
 		usercommandsEnabled: true,
 		skipPosition: 3,
 		skipReasons: [
-		["theme", "This song does not fit the room theme. "],
-		["op", "This song is on the OP list. "],
-		["history", "This song is in the history. "],
-		["troll", "The song you played was a troll. "],
-		["sound", "The song you played had bad sound quality or no sound. "],
-		["nsfw", "The song you played contained NSFW image/sound. "],
-		["unavailable", "The song you played was not available for some users. "]
+			["theme", "This song does not fit the room theme. "],
+			["op", "This song is on the OP list. "],
+			["history", "This song is in the history. "],
+			["sound", "The song you played had bad sound quality or no sound. "],
+			//["nsfw", "The song you played contained NSFW image/sound. "],
+			["unavailable", "The song you played was not available for some users. "]
+			["indispo", "The song you played was not available for some users. "]
 		],
 		afkpositionCheck: 0,
 		afkRankCheck: "admin",
@@ -306,7 +323,7 @@
 		youtubeLink: null,
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
-		"Join the discord: https://discord.gg/eJGAVBT"
+			"Join the discord: https://discord.gg/eJGAVBT"
 		],
 		messageInterval: 10,
 		songstats: true,
