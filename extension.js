@@ -172,13 +172,13 @@
 			}
 		};
 		// Improving clearlocalstorage to save plug settings, send a chat message and reload automaticaly
-		bot.commands.clearlocalstorageCommand: {
+		bot.commands.clearlocalstorageCommand = {
 			command: 'clearLS',
 			rank: 'manager',
 			type: 'exact',
 			functionality: function (chat, cmd) {
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-				if (!basicBot.commands.executable(this.rank, chat)) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
 					var plugSettings = localStorage.getItem('settings');
 					localStorage.clear();
