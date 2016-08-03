@@ -2,6 +2,141 @@
 	var fork = "WiBla";
 	var gifCooldown = new Date().getTime();
 	var settings = JSON.parse(localStorage.getItem("basicBotsettings"));
+	var emote = [
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':skull:',      -50, 10],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':bomb:',       -25, 15],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':troll:',      0,   10],
+		[':apple:',      5,   5],
+		[':apple:',      5,   5],
+		[':apple:',      5,   5],
+		[':apple:',      5,   5],
+		[':apple:',      5,   5],
+		[':lemon:',      5,   5],
+		[':lemon:',      5,   5],
+		[':lemon:',      5,   5],
+		[':lemon:',      5,   5],
+		[':lemon:',      5,   5],
+		[':cherries:',   10,  3],
+		[':cherries:',   10,  3],
+		[':cherries:',   10,  3],
+		[':grapes:',     10,  3],
+		[':grapes:',     10,  3],
+		[':grapes:',     10,  3],
+		[':watermelon:', 10,  3],
+		[':watermelon:', 10,  3],
+		[':watermelon:', 10,  3],
+		[':pineapple:',  10,  3],
+		[':pineapple:',  10,  3],
+		[':pineapple:',  10,  3],
+		[':zap:',        10,  3],
+		[':zap:',        10,  3],
+		[':zap:',        10,  3],
+		[':cookie:',     20,  2],
+		[':cookie:',     20,  2],
+		[':strawberry:', 25,  2],
+		[':strawberry:', 25,  2],
+		[':panda_face:', 30,  2],
+		[':panda_face:', 30,  2],
+		[':coffee:',     100, 1],
+		[':ice_cream:',  250, 1],
+		[':gift:',       500, 1]
+	];
+	var cd = [];
+	window.wins = [];
+
+	function chat(msg) {
+		if (msg.type !== 'log' && msg.message.toLowerCase().trim() == '!loto') {
+			if (cd.length == 0) {
+				loto(msg);
+				cd.push([msg.un, msg.uid, new Date().getTime()]);
+			} else {
+				for (var i = 0; i < cd.length; i++) {
+					if (msg.uid == cd[i][1]) {
+						var day = new Date(cd[i][2]).getDate();
+						if (day !== new Date().getDate()) {
+							loto(msg);
+							cd[i][2] == new Date().getTime();
+							break;
+						} else {
+							API.sendChat('@'+msg.un+', only one chance per day, retry tomorrow !');
+						}
+					} else if (i+1 >= cd.length) {
+						loto(msg);
+						cd.push([msg.un, msg.uid, new Date().getTime()]);
+						break;
+					}
+				}
+			}
+		}
+	}
+	function loto(msg) {
+		var row1 = Math.floor(Math.random()*emote.length);
+		var row2 = Math.floor(Math.random()*emote.length);
+		var row3 = Math.floor(Math.random()*emote.length);
+		var earn = 0;
+
+		for (var i = 0; i < emote.length; i++) {
+			if (row1 == i) {
+				row1 = emote[i][0];
+				earn += emote[i][1];
+			}
+			if (row2 == i) {
+				row2 = emote[i][0];
+				earn += emote[i][1];
+			}
+			if (row3 == i) {
+				row3 = emote[i][0];
+				earn += emote[i][1];
+			}
+		}
+
+		if (earn <= 0) API.sendChat(row1+'|'+row2+'|'+row3+', @'+msg.un+', you lost, retry tomorrow !');
+		else {
+			API.sendChat(row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada: :confetti_ball:');
+			if (wins.length > 0) {
+				for (var i = 0; i < wins.length; i++) {
+					// If user already in wins, update
+					if (msg.uid == wins[i][1]); {
+						return wins[i][2] += earn;
+					}
+				}
+				wins.push([msg.un, msg.uid, earn]);
+				// else add user to wins list
+			}	else wins.push([msg.un, msg.uid, earn]);
+		}
+	}
 
 	function extend() {
 		if (!window.bot) return setTimeout(extend, 1 * 1000);
@@ -263,6 +398,7 @@
 				dl.click();
 		  }
 		});
+		API.on(API.CHAT, function(msg){chat(msg);});
 
 		bot.loadChat();
 	}
@@ -304,8 +440,7 @@
 			["op", "This song is on the OP list. "],
 			["history", "This song is in the history. "],
 			["sound", "The song you played had bad sound quality or no sound. "],
-			//["nsfw", "The song you played contained NSFW image/sound. "],
-			["unavailable", "The song you played was not available for some users. "]
+			["unavailable", "The song you played was not available for some users. "],
 			["indispo", "The song you played was not available for some users. "]
 		],
 		afkpositionCheck: 0,
@@ -323,7 +458,8 @@
 		youtubeLink: null,
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
-			"Join the discord: https://discord.gg/eJGAVBT"
+			"Join the discord: https://discord.gg/eJGAVBT",
+			"Try the new !loto and get a chance to win PPs ! One chance per day !"
 		],
 		messageInterval: 10,
 		songstats: true,
