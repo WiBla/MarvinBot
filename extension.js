@@ -1,142 +1,92 @@
 (function(){
 	var fork = "WiBla";
 	var gifCooldown = new Date().getTime();
-	var settings = JSON.parse(localStorage.getItem("basicBotsettings"));
-	var emote = [
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':skull:',      -50, 10],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':bomb:',       -25, 15],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':troll:',      0,   10],
-		[':apple:',      5,   5],
-		[':apple:',      5,   5],
-		[':apple:',      5,   5],
-		[':apple:',      5,   5],
-		[':apple:',      5,   5],
-		[':lemon:',      5,   5],
-		[':lemon:',      5,   5],
-		[':lemon:',      5,   5],
-		[':lemon:',      5,   5],
-		[':lemon:',      5,   5],
-		[':cherries:',   10,  3],
-		[':cherries:',   10,  3],
-		[':cherries:',   10,  3],
-		[':grapes:',     10,  3],
-		[':grapes:',     10,  3],
-		[':grapes:',     10,  3],
-		[':watermelon:', 10,  3],
-		[':watermelon:', 10,  3],
-		[':watermelon:', 10,  3],
-		[':pineapple:',  10,  3],
-		[':pineapple:',  10,  3],
-		[':pineapple:',  10,  3],
-		[':zap:',        10,  3],
-		[':zap:',        10,  3],
-		[':zap:',        10,  3],
-		[':cookie:',     20,  2],
-		[':cookie:',     20,  2],
-		[':strawberry:', 25,  2],
-		[':strawberry:', 25,  2],
-		[':panda_face:', 30,  2],
-		[':panda_face:', 30,  2],
-		[':coffee:',     100, 1],
-		[':ice_cream:',  250, 1],
-		[':gift:',       500, 1]
-	];
 	var cd = [];
-	window.wins = [];
-
-	function chat(msg) {
-		if (msg.type !== 'log' && msg.message.toLowerCase().trim() == '!loto') {
-			if (cd.length == 0) {
-				loto(msg);
-				cd.push([msg.un, msg.uid, new Date().getTime()]);
-			} else {
-				for (var i = 0; i < cd.length; i++) {
-					if (msg.uid == cd[i][1]) {
-						var day = new Date(cd[i][2]).getDate();
-						if (day !== new Date().getDate()) {
-							loto(msg);
-							cd[i][2] == new Date().getTime();
-							break;
-						} else {
-							API.sendChat('@'+msg.un+', only one chance per day, retry tomorrow !');
-						}
-					} else if (i+1 >= cd.length) {
-						loto(msg);
-						cd.push([msg.un, msg.uid, new Date().getTime()]);
-						break;
-					}
-				}
-			}
-		}
-	}
-	function loto(msg) {
-		var row1 = Math.floor(Math.random()*emote.length);
-		var row2 = Math.floor(Math.random()*emote.length);
-		var row3 = Math.floor(Math.random()*emote.length);
-		var earn = 0;
-
-		for (var i = 0; i < emote.length; i++) {
-			if (row1 == i) {
-				row1 = emote[i][0];
-				earn += emote[i][1];
-			}
-			if (row2 == i) {
-				row2 = emote[i][0];
-				earn += emote[i][1];
-			}
-			if (row3 == i) {
-				row3 = emote[i][0];
-				earn += emote[i][1];
-			}
-		}
-
-		if (earn <= 0) API.sendChat(row1+'|'+row2+'|'+row3+', @'+msg.un+', you lost, retry tomorrow !');
-		else {
-			API.sendChat(row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada: :confetti_ball:');
-			if (wins.length > 0) {
-				for (var i = 0; i < wins.length; i++) {
-					// If user already in wins, update
-					if (msg.uid == wins[i][1]); {
-						return wins[i][2] += earn;
-					}
-				}
-				wins.push([msg.un, msg.uid, earn]);
-				// else add user to wins list
-			}	else wins.push([msg.un, msg.uid, earn]);
-		}
-	}
+	var wins = [];
+	var emote = [
+	[':skull:',        -50, 10],
+	[':skull:',        -50, 10],
+	[':skull:',        -50, 10],
+ 	[':skull:',        -50, 10],
+	[':skull:',        -50, 10],
+	[':skull:',        -50, 10],
+	[':skull:',        -50, 10],
+	[':skull:',        -50, 10],
+	[':skull:',        -50, 10],
+	[':skull:',        -50, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':pill:',         -25, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':bomb:',         -15, 10],
+	[':space_invader:',-10,  5],
+	[':space_invader:',-10,  5],
+	[':space_invader:',-10,  5],
+	[':space_invader:',-10,  5],
+	[':space_invader:',-10,  5],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':troll:',        0,   10],
+	[':apple:',        5,   5],
+	[':apple:',        5,   5],
+	[':apple:',        5,   5],
+	[':apple:',        5,   5],
+	[':apple:',        5,   5],
+	[':lemon:',        5,   5],
+	[':lemon:',        5,   5],
+	[':lemon:',        5,   5],
+	[':lemon:',        5,   5],
+	[':lemon:',        5,   5],
+	[':cherries:',     10,  3],
+	[':cherries:',     10,  3],
+	[':cherries:',     10,  3],
+	[':grapes:',       20,  3],
+	[':grapes:',       20,  3],
+	[':grapes:',       20,  3],
+	[':watermelon:',   20,  3],
+	[':watermelon:',   20,  3],
+	[':watermelon:',   20,  3],
+	[':pineapple:',    25,  3],
+	[':pineapple:',    25,  3],
+	[':pineapple:',    25,  3],
+	[':zap:',          50,  3],
+	[':zap:',          50,  3],
+	[':zap:',          50,  3],
+	[':cookie:',       75,  2],
+	[':cookie:',       75,  2],
+	[':strawberry:',   100,  2],
+	[':strawberry:',   100,  2],
+	[':panda_face:',   200,  2],
+	[':panda_face:',   200,  2],
+	[':coffee:',       500,  1],
+	[':ice_cream:',    1000, 1],
+	[':gift:',         2500, 1]
+];
+	if (localStorage.getItem('Loto cd') == null) localStorage.setItem('Loto cd', JSON.stringify(cd));
+	else cd = JSON.parse(localStorage.getItem('Loto cd'));
+	var settings = JSON.parse(localStorage.getItem("basicBotsettings"));
 
 	function extend() {
 		if (!window.bot) return setTimeout(extend, 1 * 1000);
@@ -148,7 +98,51 @@
 			window.bot.chatUtilities.spam.push(spamWords[i]);
 		}
 
-		// Redefining gifCommand to be bouncer min and with 60s cooldown
+		bot.loto = 	function(msg){
+			var row1 = Math.floor(Math.random()*emote.length);
+			var row2 = Math.floor(Math.random()*emote.length);
+			var row3 = Math.floor(Math.random()*emote.length);
+			var earn = 0;
+
+			for (var i = 0; i < emote.length; i++) {
+				if (row1 == i) {
+					row1 = emote[i][0];
+					earn += emote[i][1];
+				}
+				if (row2 == i) {
+					row2 = emote[i][0];
+					earn += emote[i][1];
+				}
+				if (row3 == i) {
+					row3 = emote[i][0];
+					earn += emote[i][1];
+				}
+			}
+			
+			// Jackpot
+			if (row1 == row2 && row2 == row3) {
+				earn*=3;
+				row3 += ' Jackpot !';
+			}
+			// Two same values
+			else if (row1 == row2 || row1 == row3 || row2 == row3) earn*=2;
+
+			if (earn <= 0) API.sendChat(row1+'|'+row2+'|'+row3+', @'+msg.un+', you lost, retry tomorrow !');
+			else {
+				API.sendChat(row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada:');
+				if (wins.length > 0) {
+					for (var i = 0; i < wins.length; i++) {
+						// If user already in wins, update
+						if (msg.uid == wins[i][1]); {
+							return wins[i][2] += earn;
+						}
+					}
+					wins.push([msg.un, msg.uid, earn]);
+					// else add user to wins list
+				}	else wins.push([msg.un, msg.uid, earn]);
+			}
+		};
+
 		bot.commands.gifCommand = {
 			command: ['gif', 'giphy'],
 			rank: 'bouncer',
@@ -219,7 +213,6 @@
 				}
 			}
 		};
-		// Redefine kick to use ajax
 		bot.commands.kickCommand = {
 			command: 'kick',
 			rank: 'bouncer',
@@ -287,7 +280,6 @@
 				}
 			}
 		};
-		// Fixing link cmd to display soundcloud links
 		bot.commands.linkCommand = {
 			command: 'link',
 			rank: 'user',
@@ -306,7 +298,6 @@
 				}
 			}
 		};
-		// Improving clearlocalstorage to save plug settings, send a chat message and reload automaticaly
 		bot.commands.clearlocalstorageCommand = {
 			command: 'clearLS',
 			rank: 'manager',
@@ -323,7 +314,6 @@
 				}
 			}
 		};
-		// Tell someone "I'm a bot"
 		bot.commands.bot = {
 			command: 'bot',
 			rank: 'bouncer',
@@ -356,14 +346,67 @@
 					if (name.length > 0) {
 						var audience = API.getUsers();
 						for (var i = 0; i < audience.length; i++) {
-							if (audience[i].rawun == name) return API.sendChat('/me Le bloc opératoire N°404 est disponible pour une ablation de côtes ' + name + '.');;
+							if (audience[i].rawun == name) return API.sendChat('/me Le bloc opératoire N°404 est disponible pour une ablation de côtes ' + name + '.');
 						}
 						API.sendChat('/me [@'+chat.un+'] There is no user by this name.');
 					}
 				}
 			}
 		};
-		// Fixing voteSkip
+		bot.commands.loto = {
+			command: 'loto',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					if (cd.length == 0) {
+						bot.loto(chat);
+						cd.push([chat.un, chat.uid, new Date().getTime()]);
+						localStorage.setItem('Loto cd', JSON.stringify(cd));
+					} else {
+						for (var i = 0; i < cd.length; i++) {
+							if (chat.uid == cd[i][1]) {
+								var day = new Date(cd[i][2]).getDate();
+								if (day !== new Date().getDate()) {
+									bot.loto(chat);
+									cd[i][2] == new Date().getTime();
+									break;
+								} else {
+									API.sendChat('@'+chat.un+', only one chance per day, retry tomorrow !');
+								}
+							} else if (i+1 >= cd.length) {
+								bot.loto(chat);
+								cd.push([chat.un, chat.uid, new Date().getTime()]);
+								localStorage.setItem('Loto cd', JSON.stringify(cd));
+								break;
+							}
+						}
+					}
+				}
+			}
+		};
+		bot.commands.wins = {
+			command: 'wins',
+			rank: 'host',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					if (wins.length == 0) API.sendChat('/me No winners yet !');
+					else {
+						var winners;
+						for (var i = 0; i < wins.length; i++) {
+							if (i+1 == wins.length) winners += wins[i][0]+':'+wins[i][2]+'.';
+							else winners += wins[i][0]+':'+wins[2]+', ';
+						}
+						API.sendChat('/me List of loto winners: '+winners);	
+					}
+				}
+			}
+		};
 		API.on(API.SCORE_UPDATE, function(){
 			var voteskip = settings.voteSkip;
 			var voteSkipLimit = settings.voteSkipLimit;
@@ -373,14 +416,12 @@
 				API.moderateForceSkip()
 			}
 		});
-		// Auto skip songs with 'nightcore' in title as it's not allowed
 		API.on(API.ADVANCE, function(e){
 			if (e.media.title.toLowerCase().search('nightcore') != -1 || e.media.author.toLowerCase().search('nightcore') != -1) {
 				API.sendChat('/me [@'+e.dj.rawun+'] nightcore is not allowed. Skipping..');
 				API.moderateForceSkip();
 			}
 		});
-		// Export all chat since bot has been loaded into a log.txt
 		API.on(API.CHAT_COMMAND, function(cmd){
 			if (cmd == '/exportchat') {
 				var logs = JSON.parse(localStorage.getItem('basicBotRoom'));
@@ -398,7 +439,6 @@
 				dl.click();
 		  }
 		});
-		API.on(API.CHAT, function(msg){chat(msg);});
 
 		bot.loadChat();
 	}
