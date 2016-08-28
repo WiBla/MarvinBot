@@ -1,147 +1,104 @@
 (function(){
-	var fork = "WiBla";
-	var gifCooldown = new Date().getTime();
-	var cd = [];
-	var wins = [];
-	var emote = [
-	[':skull:',        -50, 10],
-	[':skull:',        -50, 10],
-	[':skull:',        -50, 10],
- 	[':skull:',        -50, 10],
-	[':skull:',        -50, 10],
-	[':skull:',        -50, 10],
-	[':skull:',        -50, 10],
-	[':skull:',        -50, 10],
-	[':skull:',        -50, 10],
-	[':skull:',        -50, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':pill:',         -25, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':bomb:',         -15, 10],
-	[':space_invader:',-10,  5],
-	[':space_invader:',-10,  5],
-	[':space_invader:',-10,  5],
-	[':space_invader:',-10,  5],
-	[':space_invader:',-10,  5],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':troll:',        0,   10],
-	[':apple:',        5,   5],
-	[':apple:',        5,   5],
-	[':apple:',        5,   5],
-	[':apple:',        5,   5],
-	[':apple:',        5,   5],
-	[':lemon:',        5,   5],
-	[':lemon:',        5,   5],
-	[':lemon:',        5,   5],
-	[':lemon:',        5,   5],
-	[':lemon:',        5,   5],
-	[':cherries:',     10,  3],
-	[':cherries:',     10,  3],
-	[':cherries:',     10,  3],
-	[':grapes:',       20,  3],
-	[':grapes:',       20,  3],
-	[':grapes:',       20,  3],
-	[':watermelon:',   20,  3],
-	[':watermelon:',   20,  3],
-	[':watermelon:',   20,  3],
-	[':pineapple:',    25,  3],
-	[':pineapple:',    25,  3],
-	[':pineapple:',    25,  3],
-	[':zap:',          50,  3],
-	[':zap:',          50,  3],
-	[':zap:',          50,  3],
-	[':cookie:',       75,  2],
-	[':cookie:',       75,  2],
-	[':strawberry:',   100,  2],
-	[':strawberry:',   100,  2],
-	[':panda_face:',   200,  2],
-	[':panda_face:',   200,  2],
-	[':coffee:',       500,  1],
-	[':ice_cream:',    1000, 1],
-	[':gift:',         2500, 1]
-];
-	if (localStorage.getItem('Loto cd') == null) localStorage.setItem('Loto cd', JSON.stringify(cd));
-	else cd = JSON.parse(localStorage.getItem('Loto cd'));
-	var settings = JSON.parse(localStorage.getItem("basicBotsettings"));
+	const fork = "WiBla";
+	window.cooldown = {
+		// Allow use of !gif right after bot startup
+		"gif": new Date().getTime()-60000,
+		"loto": []
+	};
+	window.wins = [];
+	const emote = [
+		[':skull:',        -50, 10],
+		[':skull:',        -50, 10],
+		[':skull:',        -50, 10],
+	 	[':skull:',        -50, 10],
+		[':skull:',        -50, 10],
+		[':skull:',        -50, 10],
+		[':skull:',        -50, 10],
+		[':skull:',        -50, 10],
+		[':skull:',        -50, 10],
+		[':skull:',        -50, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':pill:',         -25, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':bomb:',         -15, 10],
+		[':space_invader:',-10,  5],
+		[':space_invader:',-10,  5],
+		[':space_invader:',-10,  5],
+		[':space_invader:',-10,  5],
+		[':space_invader:',-10,  5],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':troll:',        0,   10],
+		[':apple:',        5,   5],
+		[':apple:',        5,   5],
+		[':apple:',        5,   5],
+		[':apple:',        5,   5],
+		[':apple:',        5,   5],
+		[':lemon:',        5,   5],
+		[':lemon:',        5,   5],
+		[':lemon:',        5,   5],
+		[':lemon:',        5,   5],
+		[':lemon:',        5,   5],
+		[':cherries:',     10,  3],
+		[':cherries:',     10,  3],
+		[':cherries:',     10,  3],
+		[':grapes:',       20,  3],
+		[':grapes:',       20,  3],
+		[':grapes:',       20,  3],
+		[':watermelon:',   20,  3],
+		[':watermelon:',   20,  3],
+		[':watermelon:',   20,  3],
+		[':pineapple:',    25,  3],
+		[':pineapple:',    25,  3],
+		[':pineapple:',    25,  3],
+		[':zap:',          50,  3],
+		[':zap:',          50,  3],
+		[':zap:',          50,  3],
+		[':cookie:',       75,  2],
+		[':cookie:',       75,  2],
+		[':strawberry:',   100,  2],
+		[':strawberry:',   100,  2],
+		[':panda_face:',   200,  2],
+		[':panda_face:',   200,  2],
+		[':coffee:',       500,  1],
+		[':ice_cream:',    1000, 1],
+		[':gift:',         2500, 1]
+	];
+
+	let lotoCDLS = localStorage.getItem('loto-CD');
+	let lotoWinsLS = localStorage.getItem('loto-Wins');
+
+	if (lotoCDLS !== null) cooldown.loto = JSON.parse(lotoCDLS);
+	if (lotoWinsLS !== null) wins = JSON.parse(lotoWinsLS);
 
 	function extend() {
-		if (!window.bot) return setTimeout(extend, 1 * 1000);
+		if (!window.bot) return setTimeout(extend, 1000);
 
 		var bot = window.bot;
 		bot.retrieveSettings();
-		var spamWords = ['skip'];
-		for (var i = 0; i < spamWords.length; i++) {
-			window.bot.chatUtilities.spam.push(spamWords[i]);
-		}
-
-		bot.loto = 	function(msg){
-			var row1 = Math.floor(Math.random()*emote.length);
-			var row2 = Math.floor(Math.random()*emote.length);
-			var row3 = Math.floor(Math.random()*emote.length);
-			var earn = 0;
-
-			for (var i = 0; i < emote.length; i++) {
-				if (row1 == i) {
-					row1 = emote[i][0];
-					earn += emote[i][1];
-				}
-				if (row2 == i) {
-					row2 = emote[i][0];
-					earn += emote[i][1];
-				}
-				if (row3 == i) {
-					row3 = emote[i][0];
-					earn += emote[i][1];
-				}
-			}
-			
-			// Jackpot
-			if (row1 == row2 && row2 == row3) {
-				earn*=3;
-				row3 += ' Jackpot !';
-			}
-			// Two same values
-			else if (row1 == row2 || row1 == row3 || row2 == row3) earn*=2;
-
-			if (earn <= 0) API.sendChat(row1+'|'+row2+'|'+row3+', @'+msg.un+', you lost, retry tomorrow !');
-			else {
-				API.sendChat(row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada:');
-				if (wins.length > 0) {
-					for (var i = 0; i < wins.length; i++) {
-						// If user already in wins, update
-						if (msg.uid == wins[i][1]); {
-							return wins[i][2] += earn;
-						}
-					}
-					wins.push([msg.un, msg.uid, earn]);
-					// else add user to wins list
-				}	else wins.push([msg.un, msg.uid, earn]);
-			}
-		};
 
 		bot.commands.gifCommand = {
 			command: ['gif', 'giphy'],
@@ -150,26 +107,23 @@
 			functionality: function (chat, cmd) {
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
-				if ((new Date().getTime() - gifCooldown)/1000/60 < 1) return void (0); // if less than a minute
+				if ((new Date().getTime() - cooldown.gif)/1000/60 < 1) return void (0); // if less than a minute
 				else {
-					gifCooldown = new Date().getTime();
+					cooldown.gif = new Date().getTime();
 					var msg = chat.message;
 					if (msg.length !== cmd.length) {
-						function get_id(api_key, fixedtag, func)
-						{
-							$.getJSON(
-								"https://tv.giphy.com/v1/gifs/random?",
+						function get_id(api_key, fixedtag, func) {
+							$.getJSON("https://tv.giphy.com/v1/gifs/random?",
 								{
 									"format": "json",
 									"api_key": api_key,
 									"rating": rating,
 									"tag": fixedtag
 								},
-								function(response)
-								{
+								function(response) {
 									func(response.data.id);
 								}
-								)
+							);
 						}
 						var api_key = "dc6zaTOxFJmzC"; // public beta key
 						var rating = "pg-13"; // PG 13 gifs
@@ -185,20 +139,17 @@
 						});
 					}
 					else {
-						function get_random_id(api_key, func)
-						{
-							$.getJSON(
-								"https://tv.giphy.com/v1/gifs/random?",
+						function get_random_id(api_key, func) {
+							$.getJSON("https://tv.giphy.com/v1/gifs/random?",
 								{
 									"format": "json",
 									"api_key": api_key,
 									"rating": rating
 								},
-								function(response)
-								{
+								function(response) {
 									func(response.data.id);
 								}
-								)
+							);
 						}
 						var api_key = "dc6zaTOxFJmzC"; // public beta key
 						var rating = "pg-13"; // PG 13 gifs
@@ -306,9 +257,16 @@
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
-					var plugSettings = localStorage.getItem('settings');
+					let plugSettings = localStorage.getItem('settings');
+					let lotoWinsLS = localStorage.getItem('loto-Wins');
+					let lotoCDLS = localStorage.getItem('loto-CD');
+
 					localStorage.clear();
-					localStorage.setItem('settings', plugSettings);
+
+					if (plugSettings !== null) localStorage.setItem('settings', plugSettings);
+					if (lotoWinsLS !== null) localStorage.setItem('loto-Wins', lotoWinsLS);
+					if (lotoCDLS !== null) localStorage.setItem('loto-CD', lotoCDLS);
+
 					API.sendChat('/me [@'+chat.un+'] localStorage cleared ! Be right back..');
 					location.reload();
 				}
@@ -358,31 +316,93 @@
 			rank: 'user',
 			type: 'exact',
 			functionality: function (chat, cmd) {
+				function loto(msg) {
+					var row1 = Math.floor(Math.random()*emote.length);
+					var row2 = Math.floor(Math.random()*emote.length);
+					var row3 = Math.floor(Math.random()*emote.length);
+					var earn = 0;
+					earn += emote[row1][1];
+					earn += emote[row2][1];
+					earn += emote[row3][1];
+					row1 = emote[row1][0];
+					row2 = emote[row2][0];
+					row3 = emote[row3][0];
+					
+					// Jackpot
+					if (row1 == row2 && row2 == row3) {
+						// In case of jackpot from maluses emotes, do not display jackpot
+						if ([':skull:', ':bomb:', ':pill:', ':space_invader', 'troll'].indexOf(row1) === -1) {
+							earn *= 3;
+							row3 += ' Jackpot ! PPs multiplied by 3 !';
+						}
+					}
+					// Two same values
+					else if (row1 == row2 || row1 == row3 || row2 == row3) {
+						// No need to verify the third value since either the first or second contains at least one item of the pair
+						if ([':skull:', ':bomb:', ':pill:', ':space_invader', 'troll'].indexOf(row1) === -1 ||
+							  [':skull:', ':bomb:', ':pill:', ':space_invader', 'troll'].indexOf(row2) === -1) {
+							earn *= 2;
+							row3 += ' Pair ! PPs multiplied by 2 !';
+						}
+					}
+
+					if (earn <= 0) API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you lost, retry tomorrow !');
+					else {
+						API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada:');
+						if (wins.length > 0) {
+							for (var i = 0; i < wins.length; i++) {
+								if (i+1 >= wins.length && msg.uid != wins[i][1]) {
+									wins.push([msg.un, msg.uid, earn]);
+									return localStorage.setItem('loto-Wins', JSON.stringify(wins));
+								}
+								else if (msg.uid == wins[i][1]); {
+									wins[i][2] += earn;
+									return localStorage.setItem('loto-Wins', JSON.stringify(wins));
+								}
+							}
+						}	else {
+							wins.push([msg.un, msg.uid, earn]);
+							return localStorage.setItem('loto-Wins', JSON.stringify(wins));
+						}
+					}
+				};
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
-					if (cd.length == 0) {
-						bot.loto(chat);
-						cd.push([chat.un, chat.uid, new Date().getTime()]);
-						localStorage.setItem('Loto cd', JSON.stringify(cd));
-					} else {
-						for (var i = 0; i < cd.length; i++) {
-							if (chat.uid == cd[i][1]) {
-								var day = new Date(cd[i][2]).getDate();
+					if (cooldown.loto.length) {
+						for (var i = 0; i < cooldown.loto.length; i++) {
+							if (i+1 >= cooldown.loto.length && chat.uid !== cooldown.loto[i][1]) {
+								cooldown.loto.push([chat.un, chat.uid, new Date().getTime()]);
+								localStorage.setItem('loto-CD', JSON.stringify(cooldown.loto));
+								return loto(chat);
+							}
+							else if (chat.uid == cooldown.loto[i][1]) {
+								var day = new Date(cooldown.loto[i][2]).getDate();
 								if (day !== new Date().getDate()) {
-									bot.loto(chat);
-									cd[i][2] == new Date().getTime();
-									break;
+									cooldown.loto[i][2] == new Date().getTime();
+									localStorage.setItem('loto-CD', JSON.stringify(cooldown.loto));
+									return loto(chat);
 								} else {
-									API.sendChat('@'+chat.un+', only one chance per day, retry tomorrow !');
+									var now = new Date();
+									var h = 24 - now.getHours();
+									var m = 60 - now.getMinutes();
+									var s = 60 - now.getSeconds();
+									// Get appropriate time
+									m = s > 0 ? m-- : m;
+									h = m > 0 ? h-- : h;
+									// Add extra '0' if number is under 10
+									h = h < 1 ? '' : h+'h';
+									m = m < 10 ? '0'+m : m;
+									s = s < 10 ? '0'+s : s;
+
+									return API.sendChat('/me @'+chat.un+' you already played today, retry in '+h+m+'m'+s+'s !');
 								}
-							} else if (i+1 >= cd.length) {
-								bot.loto(chat);
-								cd.push([chat.un, chat.uid, new Date().getTime()]);
-								localStorage.setItem('Loto cd', JSON.stringify(cd));
-								break;
 							}
 						}
+					} else {
+						cooldown.loto.push([chat.un, chat.uid, new Date().getTime()]);
+						localStorage.setItem('loto-CD', JSON.stringify(cooldown.loto));
+						loto(chat);
 					}
 				}
 			}
@@ -397,19 +417,18 @@
 				else {
 					if (wins.length == 0) API.sendChat('/me No winners yet !');
 					else {
-						var winners;
 						for (var i = 0; i < wins.length; i++) {
-							if (i+1 == wins.length) winners += wins[i][0]+':'+wins[i][2]+'.';
-							else winners += wins[i][0]+':'+wins[2]+', ';
+							setTimeout(function(wins, i) {
+								API.sendChat('/me '+wins[i][0]+' won '+wins[i][2]+'PP in total.');
+							}, i*1000, wins, i);
 						}
-						API.sendChat('/me List of loto winners: '+winners);	
 					}
 				}
 			}
 		};
 		API.on(API.SCORE_UPDATE, function(){
-			var voteskip = settings.voteSkip;
-			var voteSkipLimit = settings.voteSkipLimit;
+			var voteskip = bot.settings.voteSkip;
+			var voteSkipLimit = bot.settings.voteSkipLimit;
 
 			if (voteskip && API.getScore().negative >= voteSkipLimit) {
 				API.sendChat("/me Too many mehs, skipping..");
@@ -417,7 +436,7 @@
 			}
 		});
 		API.on(API.ADVANCE, function(e){
-			if (e.media.title.toLowerCase().search('nightcore') != -1 || e.media.author.toLowerCase().search('nightcore') != -1) {
+			if (e.media.title.toLowerCase().indexOf('nightcore') != -1 || e.media.author.toLowerCase().indexOf('nightcore') != -1) {
 				API.sendChat('/me [@'+e.dj.rawun+'] nightcore is not allowed. Skipping..');
 				API.moderateForceSkip();
 			}
@@ -451,7 +470,7 @@
 		roomLock: false,
 		startupCap: 1,
 		startupVolume: 0,
-		startupEmoji: true,
+		startupEmoji: false,
 		autowoot: true,
 		autoskip: true,
 		smartSkip: true,
@@ -499,7 +518,8 @@
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
 			"Join the discord: https://discord.gg/eJGAVBT",
-			"Try the new !loto and get a chance to win PPs ! One chance per day !"
+			"Try the new !loto and get a chance to win PPs ! One chance per day !",
+			"Read the rules here http://wibla.free.fr/plug/rules"
 		],
 		messageInterval: 10,
 		songstats: true,
