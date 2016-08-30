@@ -88,8 +88,8 @@
 		[':gift:',         2500, 1]
 	];
 
-	let lotoCDLS = localStorage.getItem('loto-CD');
-	let lotoWinsLS = localStorage.getItem('loto-Wins');
+	var lotoCDLS = localStorage.getItem('loto-CD');
+	var lotoWinsLS = localStorage.getItem('loto-Wins');
 
 	if (lotoCDLS !== null) cooldown.loto = JSON.parse(lotoCDLS);
 	if (lotoWinsLS !== null) wins = JSON.parse(lotoWinsLS);
@@ -257,9 +257,9 @@
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
-					let plugSettings = localStorage.getItem('settings');
-					let lotoWinsLS = localStorage.getItem('loto-Wins');
-					let lotoCDLS = localStorage.getItem('loto-CD');
+					var plugSettings = localStorage.getItem('settings');
+					var lotoWinsLS = localStorage.getItem('loto-Wins');
+					var lotoCDLS = localStorage.getItem('loto-CD');
 
 					localStorage.clear();
 
