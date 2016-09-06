@@ -7,85 +7,85 @@
 	};
 	window.wins = [];
 	const emote = [
-		[':skull:',        -50, 10],
-		[':skull:',        -50, 10],
-		[':skull:',        -50, 10],
-	 	[':skull:',        -50, 10],
-		[':skull:',        -50, 10],
-		[':skull:',        -50, 10],
-		[':skull:',        -50, 10],
-		[':skull:',        -50, 10],
-		[':skull:',        -50, 10],
-		[':skull:',        -50, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':pill:',         -25, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':bomb:',         -15, 10],
-		[':space_invader:',-10,  5],
-		[':space_invader:',-10,  5],
-		[':space_invader:',-10,  5],
-		[':space_invader:',-10,  5],
-		[':space_invader:',-10,  5],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':troll:',        0,   10],
-		[':apple:',        5,   5],
-		[':apple:',        5,   5],
-		[':apple:',        5,   5],
-		[':apple:',        5,   5],
-		[':apple:',        5,   5],
-		[':lemon:',        5,   5],
-		[':lemon:',        5,   5],
-		[':lemon:',        5,   5],
-		[':lemon:',        5,   5],
-		[':lemon:',        5,   5],
-		[':cherries:',     10,  3],
-		[':cherries:',     10,  3],
-		[':cherries:',     10,  3],
-		[':grapes:',       20,  3],
-		[':grapes:',       20,  3],
-		[':grapes:',       20,  3],
-		[':watermelon:',   20,  3],
-		[':watermelon:',   20,  3],
-		[':watermelon:',   20,  3],
-		[':pineapple:',    25,  3],
-		[':pineapple:',    25,  3],
-		[':pineapple:',    25,  3],
-		[':zap:',          50,  3],
-		[':zap:',          50,  3],
-		[':zap:',          50,  3],
-		[':cookie:',       75,  2],
-		[':cookie:',       75,  2],
-		[':strawberry:',   100,  2],
-		[':strawberry:',   100,  2],
-		[':panda_face:',   200,  2],
-		[':panda_face:',   200,  2],
-		[':coffee:',       500,  1],
-		[':ice_cream:',    1000, 1],
-		[':gift:',         2500, 1]
+		[':skull:',        -50,  10],
+		[':skull:',        -50,  10],
+		[':skull:',        -50,  10],
+	 	[':skull:',        -50,  10],
+		[':skull:',        -50,  10],
+		[':skull:',        -50,  10],
+		[':skull:',        -50,  10],
+		[':skull:',        -50,  10],
+		[':skull:',        -50,  10],
+		[':skull:',        -50,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':pill:',         -25,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':bomb:',         -15,  10],
+		[':space_invader:',-10,   5],
+		[':space_invader:',-10,   5],
+		[':space_invader:',-10,   5],
+		[':space_invader:',-10,   5],
+		[':space_invader:',-10,   5],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':troll:',        0,    10],
+		[':apple:',        25,    5],
+		[':apple:',        25,    5],
+		[':apple:',        25,    5],
+		[':apple:',        25,    5],
+		[':apple:',        25,    5],
+		[':lemon:',        25,    5],
+		[':lemon:',        25,    5],
+		[':lemon:',        25,    5],
+		[':lemon:',        25,    5],
+		[':lemon:',        25,    5],
+		[':cherries:',     50,    3],
+		[':cherries:',     50,    3],
+		[':cherries:',     50,    3],
+		[':grapes:',       50,    3],
+		[':grapes:',       50,    3],
+		[':grapes:',       50,    3],
+		[':watermelon:',   50,    3],
+		[':watermelon:',   50,    3],
+		[':watermelon:',   50,    3],
+		[':pineapple:',    100,   3],
+		[':pineapple:',    100,   3],
+		[':pineapple:',    100,   3],
+		[':zap:',          250,   3],
+		[':zap:',          250,   3],
+		[':zap:',          250,   3],
+		[':cookie:',       375,   2],
+		[':cookie:',       375,   2],
+		[':strawberry:',   500,   2],
+		[':strawberry:',   500,   2],
+		[':panda_face:',   1000,  2],
+		[':panda_face:',   1000,  2],
+		[':coffee:',       1000,  1],
+		[':ice_cream:',    5000,  1],
+		[':gift:',         12500, 1]
 	];
 
 	var lotoCDLS = localStorage.getItem('loto-CD');
@@ -100,9 +100,74 @@
 		var bot = window.bot;
 		bot.retrieveSettings();
 
+		// Same as gif, but nsfw
+		bot.commands.gif18Command = {
+			command: ['gif18', 'giphy18'],
+			rank: 'bouncer',
+			type: 'startsWith',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				if ((new Date().getTime() - cooldown.gif)/1000/60 < 1) return void (0); // if less than a minute
+				else {
+					cooldown.gif = new Date().getTime();
+					var msg = chat.message;
+					if (msg.length !== cmd.length) {
+						function get_id(api_key, fixedtag, func) {
+							$.getJSON("https://tv.giphy.com/v1/gifs/random?",
+								{
+									"format": "json",
+									"api_key": api_key,
+									"rating": rating,
+									"tag": fixedtag
+								},
+								function(response) {
+									func(response.data.id);
+								}
+							);
+						}
+						var api_key = "dc6zaTOxFJmzC"; // public beta key
+						var rating = "nsfw";
+						var tag = msg.substr(cmd.length + 1);
+						var fixedtag = tag.replace(/ /g,"+");
+						var commatag = tag.replace(/ /g,", ");
+						get_id(api_key, tag, function(id) {
+							if (typeof id !== 'undefined') {
+								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Tags: '+commatag+']');
+							} else {
+								API.sendChat('/me ['+chat.un+'] Invalid tags, try something different. [Tags: '+commatag+']');
+							}
+						});
+					}
+					else {
+						function get_random_id(api_key, func) {
+							$.getJSON("https://tv.giphy.com/v1/gifs/random?",
+								{
+									"format": "json",
+									"api_key": api_key,
+									"rating": rating
+								},
+								function(response) {
+									func(response.data.id);
+								}
+							);
+						}
+						var api_key = "dc6zaTOxFJmzC"; // public beta key
+						var rating = "nsfw";
+						get_random_id(api_key, function(id) {
+							if (typeof id !== 'undefined') {
+								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Random GIF]');
+							} else {
+								API.sendChat('/me ['+chat.un+'] Invalid request, try again.');
+							}
+						});
+					}
+				}
+			}
+		}
 		bot.commands.gifCommand = {
 			command: ['gif', 'giphy'],
-			rank: 'bouncer',
+			rank: 'user',
 			type: 'startsWith',
 			functionality: function (chat, cmd) {
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
@@ -331,7 +396,7 @@
 					// Jackpot
 					if (row1 == row2 && row2 == row3) {
 						// In case of jackpot from maluses emotes, do not display jackpot
-						if ([':skull:', ':bomb:', ':pill:', ':space_invader', 'troll'].indexOf(row1) === -1) {
+						if ([':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row1) === -1) {
 							earn *= 3;
 							row3 += ' Jackpot ! PPs multiplied by 3 !';
 						}
@@ -339,8 +404,8 @@
 					// Two same values
 					else if (row1 == row2 || row1 == row3 || row2 == row3) {
 						// No need to verify the third value since either the first or second contains at least one item of the pair
-						if ([':skull:', ':bomb:', ':pill:', ':space_invader', 'troll'].indexOf(row1) === -1 ||
-							  [':skull:', ':bomb:', ':pill:', ':space_invader', 'troll'].indexOf(row2) === -1) {
+						if ([':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row1) === -1 ||
+							  [':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row2) === -1) {
 							earn *= 2;
 							row3 += ' Pair ! PPs multiplied by 2 !';
 						}
