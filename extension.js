@@ -404,8 +404,8 @@
 					// Two same values
 					else if (row1 == row2 || row1 == row3 || row2 == row3) {
 						// No need to verify the third value since either the first or second contains at least one item of the pair
-						if ([':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row1) === -1 ||
-							  [':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row2) === -1) {
+						if ([':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row1) !== -1 &&
+							  [':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row2) !== -1) {
 							earn *= 2;
 							row3 += ' Pair ! PPs multiplied by 2 !';
 						}
