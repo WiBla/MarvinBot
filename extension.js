@@ -1,8 +1,7 @@
 (function(){
 	const fork = "WiBla";
 	window.cooldown = {
-		// Allow use of !gif right after bot startup
-		"gif": new Date().getTime()-60000,
+		"gif": 0,
 		"loto": []
 	};
 	window.wins = [];
@@ -404,8 +403,8 @@
 					// Two same values
 					else if (row1 == row2 || row1 == row3 || row2 == row3) {
 						// No need to verify the third value since either the first or second contains at least one item of the pair
-						if ([':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row1) !== -1 &&
-							  [':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row2) !== -1) {
+						if ([':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row1) === -1 &&
+							  [':skull:', ':bomb:', ':pill:', ':space_invader', ':troll:'].indexOf(row2) === -1) {
 							earn *= 2;
 							row3 += ' Pair ! PPs multiplied by 2 !';
 						}
@@ -416,12 +415,12 @@
 						API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada:');
 						if (wins.length > 0) {
 							for (var i = 0; i < wins.length; i++) {
-								if (i+1 >= wins.length && msg.uid != wins[i][1]) {
+								if (i+1 >= wins.length && msg.uid !== wins[i][1]) {
 									wins.push([msg.un, msg.uid, earn]);
 									return localStorage.setItem('loto-Wins', JSON.stringify(wins));
 								}
-								else if (msg.uid == wins[i][1]); {
-									wins[i][2] += earn;
+								else if (msg.uid === wins[i][1]) {
+									wins[i][2] = earn;
 									return localStorage.setItem('loto-Wins', JSON.stringify(wins));
 								}
 							}
@@ -484,7 +483,7 @@
 					else {
 						for (var i = 0; i < wins.length; i++) {
 							setTimeout(function(wins, i) {
-								API.sendChat('/me '+wins[i][0]+' won '+wins[i][2]+'PP in total.');
+								API.sendChat('/me '+wins[i][0]+' won '+wins[i][2]+'PP on the last try.');
 							}, i*1000, wins, i);
 						}
 					}
