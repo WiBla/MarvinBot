@@ -443,7 +443,7 @@
 							else if (chat.uid == cooldown.loto[i][1]) {
 								var day = new Date(cooldown.loto[i][2]).getDate();
 								if (day !== new Date().getDate()) {
-									cooldown.loto[i][2] == new Date().getTime();
+									cooldown.loto[i][2] = new Date().getTime();
 									localStorage.setItem('loto-CD', JSON.stringify(cooldown.loto));
 									return loto(chat);
 								} else {
