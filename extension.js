@@ -447,19 +447,18 @@
 									localStorage.setItem('loto-CD', JSON.stringify(cooldown.loto));
 									return loto(chat);
 								} else {
-									var now = new Date();
-									var h = 24 - now.getHours();
-									var m = 60 - now.getMinutes();
-									var s = 60 - now.getSeconds();
-									// Get appropriate time
-									m = s > 0 ? m-- : m;
-									h = m > 0 ? h-- : h;
-									// Add extra '0' if number is under 10
-									h = h < 1 ? '' : h+'h';
-									m = m < 10 ? '0'+m : m;
-									s = s < 10 ? '0'+s : s;
+									// var now = new Date();
+									// var diff = new Date(1475102555250 - now.getTime());
 
-									return API.sendChat('/me @'+chat.un+' you already played today, retry in '+h+m+'m'+s+'s !');
+									// var h = diff.getUTCHours();
+									// var m = diff.getUTCMinutes();
+									// var s = diff.getUTCSeconds();
+									// // Add extra '0' if number is under 10
+									// h = h < 1 ? '' : h+'h';
+									// m = m < 10 ? '0'+m : m;
+									// s = s < 10 ? '0'+s : s;
+
+									return API.sendChat('/me @'+chat.un+' you already played today !');
 								}
 							}
 						}
@@ -586,7 +585,7 @@
 			"Read the rules here http://wibla.free.fr/plug/rules"
 		],
 		messageInterval: 10,
-		songstats: true,
+		songstats: false,
 		commandLiteral: "!",
 		blacklists: {
 			NSFW: null,
