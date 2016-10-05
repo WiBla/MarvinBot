@@ -5,112 +5,20 @@
 		"loto": []
 	};
 	window.wins = [];
-	const emote = [
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':skull:',         0],
-		[':pill:',          0],
-		[':bomb:',          0],
-		[':space_invader:', 0],
-		[':package:',       0],
-		[':troll:',         0],
-		[':cherries:',      500],
-		[':cherries:',      500],
-		[':cherries:',      500],
-		[':strawberry:',    1000],
-		[':strawberry:',    1000]
-		[':strawberry:',    1000],
-		[':grapes:',        2000],
-		[':grapes:',        2000],
-		[':grapes:',        2000],
-		[':zap:',           5000],
-		[':zap:',           5000],
-		[':game_die:',      7500],
-		[':game_die:',      7500],
-		[':crown:',         10000],
-		[':gift:',          25000]
+	var emote = [
+		[':skull:',            0, 849], // 85/100%
+		[':pill:',             0, 849], // 85/100%
+		[':bomb:',             0, 849], // 85/100%
+		[':space_invader:',    0, 849], // 85/100%
+		[':package:',          0, 849], // 85/100%
+		[':troll:',            0, 849], // 85/100%
+		[':cherries:',       500, 919], // 7/100%
+		[':strawberry:',    1000, 959], // 4/100%
+		[':grapes:',        2000, 979], // 2/100%
+		[':zap:',           5000, 989], // 1/100%
+		[':game_die:',      7500, 994], // 0.5/100%
+		[':crown:',        10000, 998], // 0.4/100%
+		[':gift:',         25000, 999]  // 0.1/100%
 	];
 
 	var lotoCDLS = localStorage.getItem('loto-CD');
@@ -407,20 +315,17 @@
 			type: 'exact',
 			functionality: function (chat, cmd) {
 				function loto(msg) {
-					var row1 = Math.floor(Math.random()*emote.length);
-					var row2 = Math.floor(Math.random()*emote.length);
-					var row3 = Math.floor(Math.random()*emote.length);
-					var earn = 0;
-					earn += emote[row1][1];
-					earn += emote[row2][1];
-					earn += emote[row3][1];
-					row1 = emote[row1][0];
-					row2 = emote[row2][0];
-					row3 = emote[row3][0];
+					var row1 = generateEmote();
+					var row2 = generateEmote();
+					var row3 = generateEmote();
+					var earn = row1[1] + row2[1] + row3[1];
+					row1 = row1[0];
+					row2 = row2[0];
+					row3 = row3[0];
 					
 					// Jackpot
 					if (row1 == row2 && row2 == row3) {
-						// In case of jackpot from maluses emotes, do not display jackpot
+						// Only applies to win emotes
 						if ([':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row1) === -1) {
 							earn *= 3;
 							row3 += ' Jackpot ! PPs multiplied by 3 !';
@@ -457,6 +362,27 @@
 						}
 					}
 				};
+				function generateEmote() {
+					var rdm = Math.random()*1000;
+
+					if (rdm <= emote[5][2]) {
+						return emote[Math.floor(Math.random()*6)];
+					} else if (rdm <= emote[6][2]) {
+						return emote[6];
+					} else if (rdm <= emote[7][2]) {
+						return emote[7];
+					} else if (rdm <= emote[8][2]) {
+						return emote[8];
+					} else if (rdm <= emote[9][2]) {
+						return emote[9];
+					} else if (rdm <= emote[10][2]) {
+						return emote[10];
+					} else if (rdm <= emote[11][2]) {
+						return emote[11];
+					} else {
+						return emote[12];
+					}
+				}
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
@@ -607,9 +533,9 @@
 		youtubeLink: null,
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
-			"Join the discord: https://discord.gg/eJGAVBT",
-			"Try the new !loto and get a chance to win PPs ! One chance per day !",
-			"Read the rules here http://wibla.free.fr/plug/rules"
+			"Join us on discord ! https://discord.gg/eJGAVBT",
+			"Give the !loto a try, you can win up to 225KPP !!",
+			"Remember to read the rules at least once http://wibla.free.fr/plug/rules"
 		],
 		messageInterval: 10,
 		songstats: false,
