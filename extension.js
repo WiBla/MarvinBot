@@ -5,24 +5,91 @@
 		"loto": []
 	};
 	window.wins = [];
-	var emote = [
-		[':skull:',            0, 849], // 85/100%
-		[':pill:',             0, 849], // 85/100%
-		[':bomb:',             0, 849], // 85/100%
-		[':space_invader:',    0, 849], // 85/100%
-		[':package:',          0, 849], // 85/100%
-		[':troll:',            0, 849], // 85/100%
-		[':cherries:',       500, 919], // 7/100%
-		[':strawberry:',    1000, 959], // 4/100%
-		[':grapes:',        2000, 979], // 2/100%
-		[':zap:',           5000, 989], // 1/100%
-		[':game_die:',      7500, 994], // 0.5/100%
-		[':crown:',        10000, 998], // 0.4/100%
-		[':gift:',         25000, 999]  // 0.1/100%
-	];
-
 	var lotoCDLS = localStorage.getItem('loto-CD');
 	var lotoWinsLS = localStorage.getItem('loto-Wins');
+	var emote = [
+		[':skull:',            0, 95],
+		[':pill:',             0, 95],
+		[':bomb:',             0, 95],
+		[':space_invader:',    0, 95],
+		[':package:',          0, 95],
+		[':troll:',            0, 95],    // 95% chance to lose
+		[':cherries:',       500, 95],    // 5%
+		[':grapes:',        1000, 98],    // 2%
+		[':zap:',           2000, 99.7],  // 0.3%
+		[':game_die:',      5000, 99.9],  // 0.1%
+		[':crown:',        10000, 99.95], // 0.05%
+		[':gift:',         25000, 99.999] // 0.001%
+	];
+	function loto(msg) {
+		var row1 = generateEmote();
+		var row2 = generateEmote();
+		var row3 = generateEmote();
+		var earn = row1[1] + row2[1] + row3[1];
+		row1 = row1[0];
+		row2 = row2[0];
+		row3 = row3[0];
+		
+		// Jackpot
+		if (row1 == row2 && row2 == row3) {
+			// Only applies to win emotes
+			if ([':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row1) === -1) {
+				earn *= 3;
+				row3 += ' Jackpot ! PPs multiplied by 3 !';
+			}
+		}
+		// Two same values
+		else if (row1 == row2 || row1 == row3 || row2 == row3) {
+			// No need to verify the third value since either the first or second contains at least one item of the pair
+			if ([':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row1) === -1 &&
+				  [':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row2) === -1) {
+				earn *= 2;
+				row3 += ' Pair ! PPs multiplied by 2 !';
+			}
+		}
+
+		if (earn <= 0) API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you lost, retry tomorrow !');
+		else {
+			if (earn >= 1000) earn = (earn /= 1000) + 'k';
+
+			API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada:');
+			
+			if (wins.length > 0) {
+				for (var i = 0; i < wins.length; i++) {
+					if (i+1 >= wins.length && msg.uid !== wins[i][1]) {
+						wins.push([msg.un, msg.uid, earn]);
+						return localStorage.setItem('loto-Wins', JSON.stringify(wins));
+					}
+					else if (msg.uid === wins[i][1]) {
+						wins[i][2] = earn;
+						return localStorage.setItem('loto-Wins', JSON.stringify(wins));
+					}
+				}
+			}	else {
+				wins.push([msg.un, msg.uid, earn]);
+				return localStorage.setItem('loto-Wins', JSON.stringify(wins));
+			}
+		}
+	}
+	function generateEmote() {
+		var rdm = Math.random()*100; // 0 - 99.999999999999999
+
+		if (rdm >= emote[11][2]) {
+			return emote[11];
+		} else if (rdm >= emote[10][2]) {
+			return emote[10];
+		} else if (rdm >= emote[9][2]) {
+			return emote[9];
+		} else if (rdm >= emote[8][2]) {
+			return emote[8];
+		} else if (rdm >= emote[7][2]) {
+			return emote[7];
+		} else if (rdm >= emote[6][2]) {
+			return emote[6];
+		} else {
+			return emote[Math.floor(Math.random()*6)];
+		}
+	}
 
 	if (lotoCDLS !== null) cooldown.loto = JSON.parse(lotoCDLS);
 	if (lotoWinsLS !== null) wins = JSON.parse(lotoWinsLS);
@@ -314,75 +381,6 @@
 			rank: 'user',
 			type: 'exact',
 			functionality: function (chat, cmd) {
-				function loto(msg) {
-					var row1 = generateEmote();
-					var row2 = generateEmote();
-					var row3 = generateEmote();
-					var earn = row1[1] + row2[1] + row3[1];
-					row1 = row1[0];
-					row2 = row2[0];
-					row3 = row3[0];
-					
-					// Jackpot
-					if (row1 == row2 && row2 == row3) {
-						// Only applies to win emotes
-						if ([':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row1) === -1) {
-							earn *= 3;
-							row3 += ' Jackpot ! PPs multiplied by 3 !';
-						}
-					}
-					// Two same values
-					else if (row1 == row2 || row1 == row3 || row2 == row3) {
-						// No need to verify the third value since either the first or second contains at least one item of the pair
-						if ([':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row1) === -1 &&
-							  [':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row2) === -1) {
-							earn *= 2;
-							row3 += ' Pair ! PPs multiplied by 2 !';
-						}
-					}
-
-					if (earn <= 0) API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you lost, retry tomorrow !');
-					else {
-						if (earn >= 1000) earn = (earn /= 1000) + 'k';
-						API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada:');
-						if (wins.length > 0) {
-							for (var i = 0; i < wins.length; i++) {
-								if (i+1 >= wins.length && msg.uid !== wins[i][1]) {
-									wins.push([msg.un, msg.uid, earn]);
-									return localStorage.setItem('loto-Wins', JSON.stringify(wins));
-								}
-								else if (msg.uid === wins[i][1]) {
-									wins[i][2] = earn;
-									return localStorage.setItem('loto-Wins', JSON.stringify(wins));
-								}
-							}
-						}	else {
-							wins.push([msg.un, msg.uid, earn]);
-							return localStorage.setItem('loto-Wins', JSON.stringify(wins));
-						}
-					}
-				};
-				function generateEmote() {
-					var rdm = Math.random()*1000;
-
-					if (rdm <= emote[5][2]) {
-						return emote[Math.floor(Math.random()*6)];
-					} else if (rdm <= emote[6][2]) {
-						return emote[6];
-					} else if (rdm <= emote[7][2]) {
-						return emote[7];
-					} else if (rdm <= emote[8][2]) {
-						return emote[8];
-					} else if (rdm <= emote[9][2]) {
-						return emote[9];
-					} else if (rdm <= emote[10][2]) {
-						return emote[10];
-					} else if (rdm <= emote[11][2]) {
-						return emote[11];
-					} else {
-						return emote[12];
-					}
-				}
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
@@ -395,22 +393,12 @@
 							}
 							else if (chat.uid == cooldown.loto[i][1]) {
 								var day = new Date(cooldown.loto[i][2]).getDate();
-								if (day !== new Date().getDate()) {
-									cooldown.loto[i][2] = new Date().getTime();
+								var now = new Date();
+								if (day !== now.getDate()) {
+									cooldown.loto[i][2] = now.getTime();
 									localStorage.setItem('loto-CD', JSON.stringify(cooldown.loto));
 									return loto(chat);
 								} else {
-									// var now = new Date();
-									// var diff = new Date(1475102555250 - now.getTime());
-
-									// var h = diff.getUTCHours();
-									// var m = diff.getUTCMinutes();
-									// var s = diff.getUTCSeconds();
-									// // Add extra '0' if number is under 10
-									// h = h < 1 ? '' : h+'h';
-									// m = m < 10 ? '0'+m : m;
-									// s = s < 10 ? '0'+s : s;
-
 									return API.sendChat('/me @'+chat.un+' you already played today !');
 								}
 							}
