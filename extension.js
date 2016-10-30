@@ -29,11 +29,11 @@
 		row1 = row1[0];
 		row2 = row2[0];
 		row3 = row3[0];
-		
+
 		// Jackpot
 		if (row1 == row2 && row2 == row3) {
 			// Only applies to win emotes
-			if ([':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row1) === -1) {
+			if ([':skull:', ':pill:', ':bomb:', ':space_invader:', ':package:', ':troll:'].indexOf(row1) === -1) {
 				earn *= 3;
 				row3 += ' Jackpot ! PPs multiplied by 3 !';
 			}
@@ -41,8 +41,8 @@
 		// Two same values
 		else if (row1 == row2 || row1 == row3 || row2 == row3) {
 			// No need to verify the third value since either the first or second contains at least one item of the pair
-			if ([':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row1) === -1 &&
-				  [':skull:', ':pill:', ':bomb:', ':space_invader', ':package:', ':troll:'].indexOf(row2) === -1) {
+			if ([':skull:', ':pill:', ':bomb:', ':space_invader:', ':package:', ':troll:'].indexOf(row1) === -1 &&
+				  [':skull:', ':pill:', ':bomb:', ':space_invader:', ':package:', ':troll:'].indexOf(row2) === -1) {
 				earn *= 2;
 				row3 += ' Pair ! PPs multiplied by 2 !';
 			}
@@ -53,7 +53,7 @@
 			if (earn >= 1000) earn = (earn /= 1000) + 'k';
 
 			API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada:');
-			
+
 			if (wins.length > 0) {
 				for (var i = 0; i < wins.length; i++) {
 					if (i+1 >= wins.length && msg.uid !== wins[i][1]) {
@@ -90,6 +90,10 @@
 			return emote[Math.floor(Math.random()*6)];
 		}
 	}
+	function whatPercent(a,b) {
+		if (a>b) return a/b*100;
+		else return 100 / (b/a);
+	}
 
 	if (lotoCDLS !== null) cooldown.loto = JSON.parse(lotoCDLS);
 	if (lotoWinsLS !== null) wins = JSON.parse(lotoWinsLS);
@@ -110,7 +114,6 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				if ((new Date().getTime() - cooldown.gif)/1000/60 < 1) return void (0); // if less than a minute
 				else {
-					cooldown.gif = new Date().getTime();
 					var msg = chat.message;
 					if (msg.length !== cmd.length) {
 						function get_id(api_key, fixedtag, func) {
@@ -133,6 +136,7 @@
 						var commatag = tag.replace(/ /g,", ");
 						get_id(api_key, tag, function(id) {
 							if (typeof id !== 'undefined') {
+								cooldown.gif = new Date().getTime();
 								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Tags: '+commatag+']');
 							} else {
 								API.sendChat('/me ['+chat.un+'] Invalid tags, try something different. [Tags: '+commatag+']');
@@ -156,6 +160,7 @@
 						var rating = "nsfw";
 						get_random_id(api_key, function(id) {
 							if (typeof id !== 'undefined') {
+								cooldown.gif = new Date().getTime();
 								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Random GIF]');
 							} else {
 								API.sendChat('/me ['+chat.un+'] Invalid request, try again.');
@@ -174,7 +179,6 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				if ((new Date().getTime() - cooldown.gif)/1000/60 < 1) return void (0); // if less than a minute
 				else {
-					cooldown.gif = new Date().getTime();
 					var msg = chat.message;
 					if (msg.length !== cmd.length) {
 						function get_id(api_key, fixedtag, func) {
@@ -197,6 +201,7 @@
 						var commatag = tag.replace(/ /g,", ");
 						get_id(api_key, tag, function(id) {
 							if (typeof id !== 'undefined') {
+								cooldown.gif = new Date().getTime();
 								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Tags: '+commatag+']');
 							} else {
 								API.sendChat('/me ['+chat.un+'] Invalid tags, try something different. [Tags: '+commatag+']');
@@ -220,6 +225,7 @@
 						var rating = "pg-13"; // PG 13 gifs
 						get_random_id(api_key, function(id) {
 							if (typeof id !== 'undefined') {
+								cooldown.gif = new Date().getTime();
 								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Random GIF]');
 							} else {
 								API.sendChat('/me ['+chat.un+'] Invalid request, try again.');
@@ -258,7 +264,7 @@
 							user = users[i];
 						}
 					}
-					
+
 					var from = chat.un;
 					if (typeof user == 'null') return API.sendChat('/me [@'+chat.un+'] No user specified.');
 
@@ -308,8 +314,12 @@
 					if (thisMedia.format == 1) API.sendChat('/me [@'+chat.un+'] Link to current song: https://youtu.be/'+thisMedia.cid);
 					else {
 						var sound = SC.get('/tracks/' + thisMedia.cid);
-					  // setTimeout is used because SC doesn't return immediately the track
-					  setTimeout(function(){API.sendChat('/me [@'+chat.un+'] Link to current song: '+sound['_result'].permalink_url);}, 1000);
+					  // setInterval is used because SC doesn't return immediately the track
+						var uInt = setInterval(function() {
+							if (typeof sound._result === "undefined") return;
+							API.sendChat('/me [@'+chat.un+'] Link to current song: '+sound._result.permalink_url);
+							clearInterval(uInt);
+						}, 10);
 					}
 				}
 			}
@@ -430,7 +440,7 @@
 				}
 			}
 		};
-		API.on(API.SCORE_UPDATE, function(){
+		API.on(API.SCORE_UPDATE, function() {
 			var voteskip = bot.settings.voteSkip;
 			var voteSkipLimit = bot.settings.voteSkipLimit;
 
@@ -439,13 +449,13 @@
 				API.moderateForceSkip()
 			}
 		});
-		API.on(API.ADVANCE, function(e){
+		API.on(API.ADVANCE, function(e) {
 			if (e.media.title.toLowerCase().indexOf('nightcore') != -1 || e.media.author.toLowerCase().indexOf('nightcore') != -1) {
 				API.sendChat('/me [@'+e.dj.rawun+'] nightcore is not allowed. Skipping..');
 				API.moderateForceSkip();
 			}
 		});
-		API.on(API.CHAT_COMMAND, function(cmd){
+		API.on(API.CHAT_COMMAND, function(cmd) {
 			if (cmd == '/exportchat') {
 				var logs = JSON.parse(localStorage.getItem('basicBotRoom'));
 				logs = logs.chatMessages;
@@ -461,6 +471,16 @@
 				dl.download = 'log.txt';
 				dl.click();
 		  }
+		});
+		API.on(API.CHAT, function(msg) {
+			if (msg.uid === API.getUser().id) return;
+			if (msg.message.length <= 10) return;
+
+			// If message.length > 10 && msg.UpperCase percentage > 50
+			if (whatPercent(msg.message.replace(/[^A-Z]/g, '').length, msg.message.length) > 50) {
+				API.moderateDeleteChat(msg.cid);
+				API.sendChat('/me @'+msg.un+' Unglue your caps lock please.');
+			}
 		});
 
 		bot.loadChat();
@@ -495,7 +515,7 @@
 		timeGuard: true,
 		maximumSongLength: 7.5,
 		autodisable: false,
-		commandCooldown: 30,
+		commandCooldown: 5,
 		usercommandsEnabled: true,
 		skipPosition: 3,
 		skipReasons: [
@@ -504,7 +524,8 @@
 			["history", "This song is in the history. "],
 			["sound", "The song you played had bad sound quality or no sound. "],
 			["unavailable", "The song you played was not available for some users. "],
-			["indispo", "The song you played was not available for some users. "]
+			["indispo", "The song you played was not available for some users. "],
+			["troll", "We do not allow this type of music/video. "]
 		],
 		afkpositionCheck: 0,
 		afkRankCheck: "admin",
