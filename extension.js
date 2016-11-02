@@ -472,16 +472,6 @@
 				dl.click();
 		  }
 		});
-		API.on(API.CHAT, function(msg) {
-			if (msg.uid === API.getUser().id) return;
-			if (msg.message.length <= 10) return;
-
-			// If message.length > 10 && msg.UpperCase percentage > 50
-			if (whatPercent(msg.message.replace(/[^A-Z]/g, '').length, msg.message.length) > 50) {
-				API.moderateDeleteChat(msg.cid);
-				API.sendChat('/me @'+msg.un+' Unglue your caps lock please.');
-			}
-		});
 
 		bot.loadChat();
 	}
