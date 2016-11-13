@@ -324,6 +324,43 @@
 				}
 			}
 		};
+		bot.commands.englishCommand = {
+			command: ['english', 'en'],
+			rank: 'residentdj',
+			type: 'startsWith',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					if (chat.message.length === cmd.length) return API.sendChat('/me No user specified.');
+					var name = chat.message.substring(cmd.length + 2);
+					var user = bot.userUtilities.lookupUserName(name);
+					if (typeof user === 'boolean') return API.sendChat('/me Invalid user specified.');
+					var lang = bot.userUtilities.getUser(user).language;
+					var ch = '/me @' + name + ' ';
+
+					if (lang === 'en') {
+						ch += 'Please, speak either French or English.';
+						API.sendChat(ch);
+					} else {
+						$.ajax({
+							type: 'GET',
+							url: 'https://translate.googleapis.com/translate_a/single?client=gtx&dt=t'+
+							'&sl=en'+
+							'&tl='+lang+
+							"&q="+ encodeURI('Please, speak either French or English.'),
+							success: function(data) {
+								console.log(data);
+							},
+							error: function(err) {
+								ch += err.responseText.split('"')[1];
+								API.sendChat(ch);
+							}
+						});
+					}
+				}
+			}
+		};
 		bot.commands.clearlocalstorageCommand = {
 			command: 'clearLS',
 			rank: 'manager',
