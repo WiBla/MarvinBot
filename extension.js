@@ -546,7 +546,7 @@
 		usercommandsEnabled: true,
 		skipPosition: 3,
 		skipReasons: [
-			["theme", "This song does not fit the room theme. "],
+			["theme", "This song does not fit the room theme: http://i.imgur.com/dxfQpy5.png"],
 			["op", "This song is on the OP list. "],
 			["history", "This song is in the history. "],
 			["sound", "The song you played had bad sound quality or no sound. "],
@@ -564,7 +564,7 @@
 		welcome: true,
 		opLink: "http://wibla.free.fr/plug/room#op",
 		rulesLink: "http://wibla.free.fr/plug/rules",
-		themeLink: "http://a2.files.magneticmag.com/image/upload/c_fill,cs_srgb,q_60,w_768/MTMzNzAxMTUzMjI0NDAzNTg3.png",
+		themeLink: "http://i.imgur.com/dxfQpy5.png",
 		fbLink: null,
 		youtubeLink: null,
 		website: "http://wibla.free.fr/plug",
