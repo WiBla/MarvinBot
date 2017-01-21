@@ -8,11 +8,11 @@
 	var lotoCDLS = localStorage.getItem('loto-CD');
 	var lotoWinsLS = localStorage.getItem('loto-Wins');
 	var emote = [
-		['💀',        0, 95],
-		['💊',        0, 95],
-		['💣',        0, 95],
-		['👾',        0, 95],
-		['📦',        0, 95],
+		['💀',        0, 95],    // skull
+		['💊',        0, 95],    // pill
+		['💣',        0, 95],    // bomb
+		['👾',        0, 95],    // space_invader
+		['📦',        0, 95],    // package
 		[':troll:',  0, 95],    // 95% chance to lose
 		['🍒',      500, 95],    // 5%
 		['🍇',     1000, 98],    // 2%
@@ -33,7 +33,7 @@
 		// Jackpot
 		if (row1 == row2 && row2 == row3) {
 			// Only applies to win emotes
-			if ([':skull:', ':pill:', ':bomb:', ':space_invader:', ':package:', ':troll:'].indexOf(row1) === -1) {
+			if (['💀', '💊', '💣', '👾', '📦', ':troll:'].indexOf(row1) === -1) {
 				earn *= 3;
 				row3 += ' Jackpot ! PPs multiplied by 3 !';
 			}
@@ -41,8 +41,8 @@
 		// Two same values
 		else if (row1 == row2 || row1 == row3 || row2 == row3) {
 			// No need to verify the third value since either the first or second contains at least one item of the pair
-			if ([':skull:', ':pill:', ':bomb:', ':space_invader:', ':package:', ':troll:'].indexOf(row1) === -1 &&
-				  [':skull:', ':pill:', ':bomb:', ':space_invader:', ':package:', ':troll:'].indexOf(row2) === -1) {
+			if (['💀', '💊', '💣', '👾', '📦', ':troll:'].indexOf(row1) === -1 &&
+				  ['💀', '💊', '💣', '👾', '📦', ':troll:'].indexOf(row2) === -1) {
 				earn *= 2;
 				row3 += ' Pair ! PPs multiplied by 2 !';
 			}
@@ -477,6 +477,30 @@
 				}
 			}
 		};
+		bot.commands.wootCommand = {
+			command: 'woot',
+			rank: 'bouncer',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					$("#woot").click();
+				}
+			}
+		};
+		bot.commands.mehCommand = {
+			command: 'meh',
+			rank: 'bouncer',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
+				if (!bot.commands.executable(this.rank, chat)) return void(0);
+				else {
+					$("#meh").click();
+				}
+			}
+		};
 		API.on(API.SCORE_UPDATE, function() {
 			var voteskip = bot.settings.voteSkip;
 			var voteSkipLimit = bot.settings.voteSkipLimit;
@@ -570,8 +594,10 @@
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
 			"Join us on discord ! https://discord.gg/eJGAVBT",
-			"Give the !loto a try, you can win up to 225KPP !!",
-			"Remember to read the rules at least once http://wibla.free.fr/plug/rules"
+			"Our favorite autowoot https://github.com/Plug-It",
+			"Give the !loto a try, you can win up to 225K PP !!",
+			"If you have any feedback, feel free to hit us on Discord or in the chat !",
+			"Remember to put the room in your favorite if we deserve it ! <3"
 		],
 		messageInterval: 10,
 		songstats: false,
