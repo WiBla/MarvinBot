@@ -477,6 +477,7 @@
 				}
 			}
 		};
+		// Blame Isebella
 		bot.commands.wootCommand = {
 			command: 'woot',
 			rank: 'bouncer',
