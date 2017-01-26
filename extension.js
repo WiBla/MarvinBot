@@ -498,6 +498,15 @@
 				API.sendChat('/me [@'+e.dj.rawun+'] nightcore is not allowed. Skipping..');
 				API.moderateForceSkip();
 			}
+
+			let limit = bot.settings.maximumSongLength*60;
+			if (bot.settings.smartSkip && e.media.duration > limit) {
+				API.sendChat(`Song is longer than ${Math.floor(limit/60)}min ${limit%60}s, skipping after the limit.`);
+				setTimeout(function() {
+					API.sendChat('Skipping after the time limit..');
+					bot.roomUtilities.smartSkip();
+				}, limit*1000);
+			}
 		});
 		API.on(API.CHAT_COMMAND, function(cmd) {
 			if (cmd == '/exportchat') {
@@ -552,7 +561,7 @@
 		voteSkip: true,
 		voteSkipLimit: 5,
 		historySkip: true,
-		timeGuard: true,
+		timeGuard: false,
 		maximumSongLength: 7.5,
 		autodisable: false,
 		commandCooldown: 5,
