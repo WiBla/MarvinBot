@@ -94,6 +94,9 @@
 		if (a>b) return a/b*100;
 		else return 100 / (b/a);
 	}
+	function toggleCycle() {
+		API.moderateDJCycle(API.getUsers().length < 10);
+	}
 
 	if (lotoCDLS !== null) cooldown.loto = JSON.parse(lotoCDLS);
 	if (lotoWinsLS !== null) wins = JSON.parse(lotoWinsLS);
@@ -458,26 +461,6 @@
 				}
 			}
 		};
-		bot.commands.wins = {
-			command: 'wins',
-			rank: 'host',
-			type: 'exact',
-			functionality: function (chat, cmd) {
-				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
-				if (!bot.commands.executable(this.rank, chat)) return void (0);
-				else {
-					if (wins.length == 0) API.sendChat('/me No winners yet !');
-					else {
-						for (var i = 0; i < wins.length; i++) {
-							setTimeout(function(wins, i) {
-								API.sendChat('/me '+wins[i][0]+' won '+wins[i][2]+'PP on the last try.');
-							}, i*1000, wins, i);
-						}
-					}
-				}
-			}
-		};
-		// Blame Isebella
 		bot.commands.wootCommand = {
 			command: 'woot',
 			rank: 'bouncer',
@@ -502,13 +485,12 @@
 				}
 			}
 		};
-		API.on(API.SCORE_UPDATE, function() {
-			var voteskip = bot.settings.voteSkip;
-			var voteSkipLimit = bot.settings.voteSkipLimit;
+		API.on(API.SCORE_UPDATE, function(score) {
+			if (score.negative <= bot.settings.voteSkipLimit) return;
 
-			if (voteskip && API.getScore().negative >= voteSkipLimit) {
+			if (bot.settings.voteSkip) {
 				API.sendChat("/me Too many mehs, skipping..");
-				API.moderateForceSkip()
+				API.moderateForceSkip();
 			}
 		});
 		API.on(API.ADVANCE, function(e) {
@@ -533,6 +515,12 @@
 				dl.download = 'log.txt';
 				dl.click();
 		  }
+		});
+		API.on(API.USER_JOIN, function(user) {
+			toggleCycle();
+		});
+		API.on(API.USER_LEAVE, function(user) {
+			toggleCycle();
 		});
 
 		bot.loadChat();
@@ -582,7 +570,7 @@
 		afkpositionCheck: 0,
 		afkRankCheck: "admin",
 		motdEnabled: false,
-		motdInterval: 10,
+		motdInterval: 5,
 		motd: "",
 		filterChat: false,
 		etaRestriction: true,
@@ -598,9 +586,10 @@
 			"Our favorite autowoot https://github.com/Plug-It",
 			"Give the !loto a try, you can win up to 225K PP !!",
 			"If you have any feedback, feel free to hit us on Discord or in the chat !",
-			"Remember to put the room in your favorite if we deserve it ! <3"
+			"Remember to put the room in your favorite if we deserve it ! <3",
+			"!roulette"
 		],
-		messageInterval: 10,
+		messageInterval: 5,
 		songstats: false,
 		commandLiteral: "!",
 		blacklists: {
