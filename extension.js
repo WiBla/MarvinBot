@@ -172,7 +172,7 @@
 					}
 				}
 			}
-		}
+		};
 		bot.commands.gifCommand = {
 			command: ['gif', 'giphy'],
 			rank: 'user',
@@ -269,7 +269,7 @@
 					}
 
 					var from = chat.un;
-					if (typeof user == 'null') return API.sendChat('/me [@'+chat.un+'] No user specified.');
+					if (typeof user === null) return API.sendChat('/me [@'+chat.un+'] No user specified.');
 
 					var permFrom = API.getUser(chat.uid).role;
 					var permTokick = API.getUser(user.id).role;
@@ -496,16 +496,19 @@
 		API.on(API.ADVANCE, function(e) {
 			if (e.media.title.toLowerCase().indexOf('nightcore') != -1 || e.media.author.toLowerCase().indexOf('nightcore') != -1) {
 				API.sendChat('/me [@'+e.dj.rawun+'] nightcore is not allowed. Skipping..');
-				API.moderateForceSkip();
+				bot.roomUtilities.smartSkip();
 			}
 
 			let limit = bot.settings.maximumSongLength*60;
 			if (bot.settings.smartSkip && e.media.duration > limit) {
 				API.sendChat(`Song is longer than ${Math.floor(limit/60)}min ${limit%60}s, skipping after the limit.`);
-				setTimeout(function() {
-					API.sendChat('Skipping after the time limit..');
-					bot.roomUtilities.smartSkip();
-				}, limit*1000);
+				setTimeout(function(data) {
+					// Is it still the same music or has it been skipped already ?
+					if (data.media.cid === API.getMedia().cid) {
+						API.sendChat('Skipping after the time limit..');
+						API.moderateForceSkip();
+					}
+				}, limit*1000, e);
 			}
 		});
 		API.on(API.CHAT_COMMAND, function(cmd) {
@@ -556,7 +559,7 @@
 		lockdownEnabled: false,
 		lockGuard: false,
 		maximumLocktime: 10,
-		cycleGuard: true,
+		cycleGuard: false,
 		maximumCycletime: 30,
 		voteSkip: true,
 		voteSkipLimit: 5,
@@ -569,12 +572,12 @@
 		skipPosition: 3,
 		skipReasons: [
 			["theme", "This song does not fit the room theme: http://i.imgur.com/dxfQpy5.png"],
-			["op", "This song is on the OP list. "],
-			["history", "This song is in the history. "],
-			["sound", "The song you played had bad sound quality or no sound. "],
-			["unavailable", "The song you played was not available for some users. "],
+			["op", "This song is on the OP list."],
+			["history", "This song is in the history."],
+			["sound", "The song you played had bad sound quality or no sound."],
+			["unavailable", "The song you played was not available for some users."],
 			["indispo", "The song you played was not available for some users. "],
-			["troll", "We do not allow this type of music/video. "]
+			["troll", "We do not allow this type of music/video."]
 		],
 		afkpositionCheck: 0,
 		afkRankCheck: "admin",
@@ -592,13 +595,16 @@
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
 			"Join us on discord ! https://discord.gg/eJGAVBT",
-			"Our favorite autowoot https://github.com/Plug-It",
-			"Give the !loto a try, you can win up to 225K PP !!",
+			"Give the !loto a try, you can win up to 225K PP !! :gift:",
 			"If you have any feedback, feel free to hit us on Discord or in the chat !",
+			"Our favorite autowoot https://github.com/Plug-It",
 			"Remember to put the room in your favorite if we deserve it ! <3",
-			"!roulette"
+			":warning: If your songs has more than 5 mehs, it will be skipped !",
+			"The DJ rotation is automaticly enabled if they are less than 10 users :)",
+			"Invite your friends ! The more people, the more fun !",
+			"You can play music up to 7min 30sec. After that, it will be skipped !"
 		],
-		messageInterval: 5,
+		messageInterval: 10,
 		songstats: false,
 		commandLiteral: "!",
 		blacklists: {
