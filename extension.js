@@ -21,6 +21,15 @@
 		['👑',    10000, 99.95], // 0.05%
 		['🎁',    25000, 99.999] // 0.001%
 	];
+	var tuneStrings = [
+		"%%DJ%%, %%USER%% would like you to know that this is a great tune !",
+		"%%DJ%%, %%USER%% thinks this is an awesome track !",
+		"%%DJ%%, keep playing such great tracks because %%USER%% seems to like them !",
+		"%%USER%% absolutely love this music %%DJ%% !",
+		'%%DJ%%, %%USER%% is really enjoying this track !',
+		'%%DJ%%, %%USER%% is dancing his feet of this track !',
+		'"%%DJ%% DUDE, this is awesome !" -from %%USER%%'
+	];
 	function loto(msg) {
 		var row1 = generateEmote();
 		var row2 = generateEmote();
@@ -485,6 +494,30 @@
 				}
 			}
 		};
+		bot.commands.tune = {
+			command: 'tune',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					var users = {
+						dj: '@'+API.getDJ().username,
+						user: '@'+chat.un
+					}
+					var string = tuneStrings[Math.floor(Math.random()*tuneStrings.length)];
+
+					// Self tuning your own track are you ?
+					if (users.dj === users.user) return API.sendChat('/me Le bloc opératoire N°404 est disponible pour une ablation de côtes ' + users.dj + '.');
+
+					for (var key in users) {
+						string = string.split('%%'+key.toUpperCase()+'%%').join(users[key]);
+					}
+					API.sendChat('/me ' + string);
+				}
+			}
+		};
 		API.on(API.SCORE_UPDATE, function(score) {
 			if (score.negative <= bot.settings.voteSkipLimit) return;
 
@@ -600,7 +633,7 @@
 			"Our favorite autowoot https://github.com/Plug-It",
 			"Remember to put the room in your favorite if we deserve it ! <3",
 			":warning: If your songs has more than 5 mehs, it will be skipped !",
-			"The DJ rotation is automaticly enabled if they are less than 10 users :)",
+			"The DJ rotation is automaticly enabled if there are less than 10 users :)",
 			"Invite your friends ! The more people, the more fun !",
 			"You can play music up to 7min 30sec. After that, it will be skipped !"
 		],
