@@ -107,6 +107,11 @@
 		API.moderateDJCycle(API.getUsers().length < 10);
 	}
 
+	Number.prototype.spaceOut = function() {
+		if (isNaN(this) || this < 999) return this;
+		return (this).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+	}
+
 	if (lotoCDLS !== null) cooldown.loto = JSON.parse(lotoCDLS);
 	if (lotoWinsLS !== null) wins = JSON.parse(lotoWinsLS);
 
@@ -116,7 +121,6 @@
 		var bot = window.bot;
 		bot.retrieveSettings();
 
-		// Same as gif, but nsfw
 		bot.commands.gif18Command = {
 			command: ['gif18', 'giphy18'],
 			rank: 'bouncer',
@@ -491,6 +495,7 @@
 				if (!bot.commands.executable(this.rank, chat)) return void(0);
 				else {
 					$("#meh").click();
+					API.sendChat('http://i.imgur.com/NGpjdvp.gif');
 				}
 			}
 		};
@@ -515,6 +520,18 @@
 						string = string.split('%%'+key.toUpperCase()+'%%').join(users[key]);
 					}
 					API.sendChat('/me ' + string);
+				}
+			}
+		};
+		bot.commands.info = {
+			command: 'info',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					API.sendChat(`J'ai ${API.getUser().pp.spaceOut()}pp, ${API.getUser().xp.spaceOut()}xp, je suis au niveau ${API.getUser().level} [${$('.info .bar .value')[0].innerText} xp]`);
 				}
 			}
 		};
@@ -566,6 +583,16 @@
 		});
 		API.on(API.USER_LEAVE, function(user) {
 			toggleCycle();
+		});
+		API.on(API.CHAT, function(msg) {
+			// Auto-delete socket app promotion
+			if (
+				msg.type === "emote" &&
+				msg.message.indexOf('http://socket.dj') !== -1 &&
+				API.hasPermission(null, API.ROLE.BOUNCER)
+			) {
+				API.moderateDeleteChat(msg.cid);
+			}
 		});
 
 		bot.loadChat();
