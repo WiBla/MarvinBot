@@ -30,6 +30,9 @@
 		'%%DJ%%, %%USER%% is dancing his feet of this track !',
 		'"%%DJ%% DUDE, this is awesome !" -from %%USER%%'
 	];
+	var modules = {
+		roomInfo: _.find(require.s.contexts._.defined,m=>m&&m.attributes&&m.attributes.shouldCycle)
+	};
 	function loto(msg) {
 		var row1 = generateEmote();
 		var row2 = generateEmote();
@@ -104,7 +107,13 @@
 		else return 100 / (b/a);
 	}
 	function toggleCycle() {
-		API.moderateDJCycle(API.getUsers().length < 10);
+		let shouldCycle = modules.roomInfo.attributes.shouldCycle;
+
+		if (shouldCycle && API.getUsers().length > 11) {
+			API.moderateDJCycle(false);
+		} else if (!shouldCycle && API.getUsers().length < 9) {
+			API.moderateDJCycle(true);
+		}
 	}
 
 	Number.prototype.spaceOut = function() {
