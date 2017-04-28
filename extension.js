@@ -162,9 +162,9 @@
 						get_id(api_key, tag, function(id) {
 							if (typeof id !== 'undefined') {
 								cooldown.gif = new Date().getTime();
-								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Tags: '+commatag+']');
+								API.sendChat('/me ['+chat.un+'] [Tags: '+commatag+'] http:\/\/i.giphy.com\/'+id+'.gif');
 							} else {
-								API.sendChat('/me ['+chat.un+'] Invalid tags, try something different. [Tags: '+commatag+']');
+								API.sendChat('/me ['+chat.un+'] [Tags: '+commatag+'] Invalid tags, try something different.');
 							}
 						});
 					}
@@ -186,7 +186,7 @@
 						get_random_id(api_key, function(id) {
 							if (typeof id !== 'undefined') {
 								cooldown.gif = new Date().getTime();
-								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Random GIF]');
+								API.sendChat('/me ['+chat.un+'] [Random GIF] http:\/\/i.giphy.com\/'+id+'.gif');
 							} else {
 								API.sendChat('/me ['+chat.un+'] Invalid request, try again.');
 							}
@@ -227,9 +227,9 @@
 						get_id(api_key, tag, function(id) {
 							if (typeof id !== 'undefined') {
 								cooldown.gif = new Date().getTime();
-								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Tags: '+commatag+']');
+								API.sendChat('/me ['+chat.un+'] [Tags: '+commatag+'] http:\/\/i.giphy.com\/'+id+'.gif');
 							} else {
-								API.sendChat('/me ['+chat.un+'] Invalid tags, try something different. [Tags: '+commatag+']');
+								API.sendChat('/me ['+chat.un+'] [Tags: '+commatag+'] Invalid tags, try something different.');
 							}
 						});
 					}
@@ -251,7 +251,7 @@
 						get_random_id(api_key, function(id) {
 							if (typeof id !== 'undefined') {
 								cooldown.gif = new Date().getTime();
-								API.sendChat('/me ['+chat.un+'] http:\/\/i.giphy.com\/'+id+'.gif [Random GIF]');
+								API.sendChat('/me ['+chat.un+'] [Random GIF] http:\/\/i.giphy.com\/'+id+'.gif');
 							} else {
 								API.sendChat('/me ['+chat.un+'] Invalid request, try again.');
 							}
@@ -375,7 +375,8 @@
 							'&tl='+lang+
 							"&q="+ encodeURI('Please, speak either French or English.'),
 							success: function(data) {
-								console.log(data);
+								ch += data[0][0][0];
+								API.sendChat(ch);
 							},
 							error: function(err) {
 								ch += err.responseText.split('"')[1];
@@ -545,7 +546,7 @@
 			}
 		};
 		API.on(API.SCORE_UPDATE, function(score) {
-			if (score.negative <= bot.settings.voteSkipLimit) return;
+			if (score.negative < bot.settings.voteSkipLimit) return;
 
 			if (bot.settings.voteSkip) {
 				API.sendChat("/me Too many mehs, skipping..");
