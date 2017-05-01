@@ -120,6 +120,14 @@
 		if (isNaN(this) || this < 999) return this;
 		return (this).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 	}
+	API.moderateForceQuit = function() {
+		if (API.hasPermission(null, API.ROLE.BOUNCER)) {
+			$.ajax({
+				url: '/_/booth/remove/'+API.getDJ().id,
+				method: 'DELETE'
+			});
+		}
+	};
 
 	if (lotoCDLS !== null) cooldown.loto = JSON.parse(lotoCDLS);
 	if (lotoWinsLS !== null) wins = JSON.parse(lotoWinsLS);
@@ -602,6 +610,49 @@
 				API.hasPermission(null, API.ROLE.BOUNCER)
 			) {
 				API.moderateDeleteChat(msg.cid);
+			}
+		});
+		API.on(API.HISTORY_UPDATE, function(history) {
+			let media = API.getMedia();
+			let dj = API.getDJ();
+			var warns = 0;
+
+			// if no media, no need to check
+			if (typeof media === 'undefined') return;
+			// i = 1 to jump the first item being the current song
+			for (var i = 1; i < history.length; i++) {
+				if (media.format == history[i].media.format && media.cid == history[i].media.cid)
+					warns++;
+			}
+
+			switch(warns) {
+				case 0:
+				case 1:
+					return;
+				break;
+				case 2:
+					API.sendChat(`/me First Warning @${dj.username}, you have two songs in history, if this continue, you will be removed from the waitlist.`);
+				break;
+				case 3:
+					API.sendChat(`/me Second Warning @${dj.username}, please check your playlists or you will be removed.`);
+				break;
+				case 4:
+					API.moderateForceQuit();
+					API.sendChat(`/me @${dj.username} you have been removed from the waitlist for having too many songs in history. If this happens once more, you will be banned for one hour.`);
+				break;
+				default:
+					$.ajax({
+						type: 'POST',
+						url: '/_/bans/add',
+						data: JSON.stringify({
+							'userID': dj.id,
+							'reason': 4,
+							'duration': 'h'
+						}),
+						dataType: 'json',
+						contentType: 'application/json'
+					});
+				break;
 			}
 		});
 
