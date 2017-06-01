@@ -690,6 +690,8 @@
 		autodisable: false,
 		commandCooldown: 5,
 		usercommandsEnabled: true,
+		thorCommand: false,
+    thorCooldown: 15,
 		skipPosition: 3,
 		skipReasons: [
 			["theme", "This song does not fit the room theme: http://i.imgur.com/dxfQpy5.png"],
