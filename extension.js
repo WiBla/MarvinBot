@@ -115,6 +115,41 @@
 			API.moderateDJCycle(true);
 		}
 	}
+	// Pendu
+	String.prototype.replaceAt=function(index, replacement) {
+		return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
+	}
+	const words = ['chorus', 'clef', 'maestro', 'piano', 'music', 'symphony', 'rythm', 'requiem', 'serenade', 'sonata', 'soprano', 'vibrato', 'virtuoso', 'table', 'television', 'drawer', 'computer', 'laptop', 'house', 'church', 'fruits', 'vegetable', 'speakers', 'games', 'keyboard', 'coins', 'money'];
+	const abc = 'abcdefghijklmnopqrstuvwxyz';
+	var penduActive = false;
+	var secret = '';
+	var underline = '';
+	var guess = 10;
+	var guessed = [];
+	var hangMessaged = [];
+	function startPendu() {
+		if (!penduActive) {
+			penduActive = true;
+			secret = words[Math.floor(Math.random()*words.length)];
+
+			for (var i=0; i<secret.length; i++) {
+				underline+='-';
+			}
+
+			API.sendChat(`A new hangman has started! ${underline} ${guess} guesses left!`);
+		} else {
+			API.sendChat('A hangman is already active!');
+		}
+	}
+	function resetPendu() {
+		penduActive = false;
+		underline = '';
+		secret = '';
+		guess = 10;
+		guessed = [];
+		hangMessaged.forEach((e,i,a) => {API.moderateDeleteChat(e)});
+		hangMessaged = [];
+	}
 
 	Number.prototype.spaceOut = function() {
 		if (isNaN(this) || this < 999) return this;
@@ -553,6 +588,55 @@
 				}
 			}
 		};
+		bot.commands.helpRanks = {
+			command: 'rank',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					API.sendChat('https://i.imgur.com/eZV5Hc5.png');
+				}
+			}
+		};
+		bot.commands.helpxp = {
+			command: 'xp',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					API.sendChat('https://yennyan.me/tsy/xppp.png');
+				}
+			}
+		};
+		bot.commands.penduCommand = {
+			command: 'pendu',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					startPendu();
+				}
+			}
+		};
+		bot.commands.stopPenduCommand = {
+			command: 'stoppendu',
+			rank: 'bouncer',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					resetPendu();
+					API.sendChat('Hangman has been reset!');
+				}
+			}
+		};
 		API.on(API.SCORE_UPDATE, function(score) {
 			if (score.negative < bot.settings.voteSkipLimit) return;
 
@@ -610,6 +694,48 @@
 				API.hasPermission(null, API.ROLE.BOUNCER)
 			) {
 				API.moderateDeleteChat(msg.cid);
+			}
+			if (msg.type === 'log' || msg.type === 'emote') return;
+			if (msg.uid === API.getUser().id) hangMessaged.push(msg.cid);
+
+			msg.message = msg.message.toLowerCase();
+			if (msg.message.length === 1 && penduActive && abc.indexOf(msg.message) !== -1) {
+				if (secret.indexOf(msg.message) !== -1 && guessed.indexOf(msg.message) === -1) {
+					guessed.push(msg.message);
+					for (var i = 0; i < secret.length; i++) {
+						if (secret.charAt(i) === msg.message) {
+							underline = underline.replaceAt(i, msg.message);
+						}
+					}
+
+					if (underline.indexOf('-') !== -1)
+						API.sendChat(`${underline} ${guess} guesses left!  ${guessed.join(',')}`);
+					else {
+						API.sendChat(`/me @${msg.un} You found the secret word "${secret}"! :clap:`);
+						resetPendu();
+					}
+				} else if (guessed.indexOf(msg.message) !== -1) {
+					API.sendChat(`This letter has already been guessed! ${underline} ${guess} guesses left!  ${guessed.join(',')}`);
+				} else {
+					guess--;
+					guessed.push(msg.message);
+
+					if (guess !== 0)
+						API.sendChat(`${underline} ${guess} guesses left! ${guessed.join(',')}`);
+					else {
+						API.sendChat(`0 guesses left! Nobody found the secret word "${secret}" :disappointed:`);
+						resetPendu();
+					}
+				}
+
+				API.moderateDeleteChat(msg.cid);
+			} else if (msg.message.length === secret.length && penduActive) {
+				if (msg.message.toLowerCase() !== secret)
+					API.sendChat(`${msg.message} is not the searched word! Try again!`);
+				else {
+					API.sendChat(`/me @${msg.un} You found the secret word "${secret}"! :clap:`);
+					resetPendu();
+				}
 			}
 		});
 		API.on(API.HISTORY_UPDATE, function(history) {
