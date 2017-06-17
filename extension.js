@@ -119,7 +119,7 @@
 	String.prototype.replaceAt=function(index, replacement) {
 		return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
 	}
-	const words = ['chorus', 'clef', 'maestro', 'piano', 'music', 'symphony', 'rythm', 'requiem', 'serenade', 'sonata', 'soprano', 'vibrato', 'virtuoso', 'table', 'television', 'drawer', 'computer', 'laptop', 'house', 'church', 'fruits', 'vegetable', 'speakers', 'games', 'keyboard', 'coins', 'money'];
+	const words = ['chorus', 'clef', 'maestro', 'piano', 'music', 'symphony', 'rythm', 'requiem', 'serenade', 'sonata', 'soprano', 'vibrato', 'virtuoso', 'table', 'television', 'drawer', 'computer', 'laptop', 'house', 'church', 'fruits', 'vegetable', 'speakers', 'games', 'keyboard', 'coins', 'money', 'happy', 'share', 'disco', 'country', 'paper', 'magnetophone', 'xylophone', 'guitare'];
 	const abc = 'abcdefghijklmnopqrstuvwxyz';
 	var penduActive = false;
 	var secret = '';
@@ -453,6 +453,18 @@
 				}
 			}
 		};
+		bot.commands.helpCommand = {
+			command: 'help',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					API.sendChat('This image will get you started on plug: https://i.imgur.com/ZeRR07N.png');
+				}
+			}
+		}
 		bot.commands.bot = {
 			command: 'bot',
 			rank: 'bouncer',
@@ -527,7 +539,7 @@
 				}
 			}
 		};
-		bot.commands.wootCommand = {
+		bot.commands.woot = {
 			command: 'woot',
 			rank: 'bouncer',
 			type: 'exact',
@@ -539,7 +551,7 @@
 				}
 			}
 		};
-		bot.commands.mehCommand = {
+		bot.commands.meh = {
 			command: 'meh',
 			rank: 'bouncer',
 			type: 'exact',
@@ -589,7 +601,7 @@
 			}
 		};
 		bot.commands.helpRanks = {
-			command: 'rank',
+			command: ['helpranks', 'rank'],
 			rank: 'user',
 			type: 'exact',
 			functionality: function (chat, cmd) {
@@ -600,8 +612,8 @@
 				}
 			}
 		};
-		bot.commands.helpxp = {
-			command: 'xp',
+		bot.commands.helpXP = {
+			command: ['helpxp', 'xp'],
 			rank: 'user',
 			type: 'exact',
 			functionality: function (chat, cmd) {
@@ -612,7 +624,19 @@
 				}
 			}
 		};
-		bot.commands.penduCommand = {
+		bot.commands.discord = {
+			command: 'discord',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					API.sendChat('Connect with us on our Discord: ' + bot.settings.discordLink);
+				}
+			}
+		};
+		bot.commands.pendu = {
 			command: 'pendu',
 			rank: 'user',
 			type: 'exact',
@@ -624,7 +648,7 @@
 				}
 			}
 		};
-		bot.commands.stopPenduCommand = {
+		bot.commands.stopPendu = {
 			command: 'stoppendu',
 			rank: 'bouncer',
 			type: 'exact',
@@ -634,6 +658,24 @@
 				else {
 					resetPendu();
 					API.sendChat('Hangman has been reset!');
+				}
+			}
+		};
+		bot.commands.eval = {
+			command: ['eval', 'code', 'exec'],
+			rank: 'cohost',
+			type: 'startsWith',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					if ([4613422, 4272266].indexOf(chat.uid) === -1) return API.sendChat('This command can only be executed by trusted users.');
+					try {
+						var code = chat.message.substr(cmd.length + 1);
+						eval(code);
+					} catch (err) {
+						API.sendChat(err.toString());
+					}
 				}
 			}
 		};
@@ -729,7 +771,7 @@
 				}
 
 				API.moderateDeleteChat(msg.cid);
-			} else if (msg.message.length === secret.length && penduActive) {
+			} else if (msg.message.length === secret.length && penduActive && msg.message.indexOf(bot.settings.commandLiteral) !== 0) {
 				if (msg.message.toLowerCase() !== secret)
 					API.sendChat(`${msg.message} is not the searched word! Try again!`);
 				else {
@@ -838,9 +880,10 @@
 		welcome: true,
 		opLink: "http://wibla.free.fr/plug/room#op",
 		rulesLink: "http://wibla.free.fr/plug/rules",
-		themeLink: "http://i.imgur.com/dxfQpy5.png",
+		themeLink: "https://i.imgur.com/2riDvuR.png",
 		fbLink: null,
 		youtubeLink: null,
+		discordLink: "https://discord.gg/eJGAVBT",
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
 			"Join us on discord ! https://discord.gg/eJGAVBT",
