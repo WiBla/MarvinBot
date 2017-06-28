@@ -689,20 +689,27 @@
 		});
 		API.on(API.ADVANCE, function(e) {
 			if (e.media.title.toLowerCase().indexOf('nightcore') != -1 || e.media.author.toLowerCase().indexOf('nightcore') != -1) {
-				API.sendChat('/me [@'+e.dj.rawun+'] nightcore is not allowed. Skipping..');
+				API.sendChat('/me [@'+e.dj.username+'] nightcore is not allowed. Skipping..');
 				bot.roomUtilities.smartSkip();
-			}
-
-			let limit = bot.settings.maximumSongLength*60;
-			if (bot.settings.smartSkip && e.media.duration > limit) {
-				API.sendChat(`Song is longer than ${Math.floor(limit/60)}min ${limit%60}s, skipping after the limit.`);
-				setTimeout(function(data) {
-					// Is it still the same music or has it been skipped already ?
-					if (data.media.cid === API.getMedia().cid) {
-						API.sendChat('Skipping after the time limit..');
-						API.moderateForceSkip();
+			} else if (e.media.format === 2) {
+				SC.get('/tracks/' + e.media.cid).catch((error) => {
+					if (error.status === 404) {
+						API.sendChat('/me [@'+e.dj.username+'] this track is unavailable, please update your playlists and chose another song before you play again.');
+						bot.roomUtilities.smartSkip();
 					}
-				}, limit*1000, e);
+				});
+			} else {
+				let limit = bot.settings.maximumSongLength*60;
+				if (bot.settings.smartSkip && e.media.duration > limit) {
+					API.sendChat(`Song is longer than ${Math.floor(limit/60)}min ${limit%60}s, skipping after the limit.`);
+					setTimeout(function(data) {
+						// Is it still the same music or has it been skipped already ?
+						if (data.media.cid === API.getMedia().cid) {
+							API.sendChat('Skipping after the time limit..');
+							API.moderateForceSkip();
+						}
+					}, limit*1000, e);
+				}
 			}
 		});
 		API.on(API.CHAT_COMMAND, function(cmd) {
@@ -894,7 +901,10 @@
 			":warning: If your songs has more than 5 mehs, it will be skipped !",
 			"The DJ rotation is automaticly enabled if there are less than 10 users :)",
 			"Invite your friends ! The more people, the more fun !",
-			"You can play music up to 7min 30sec. After that, it will be skipped !"
+			"You can play music up to 7min 30sec. After that, it will be skipped !",
+			"Try the !pendu if you're in a gaming mood !",
+			"Please do not stay afk with autojoin on for longer than an hour !",
+			"Try to shuffle your playlists as much as possible, here's a great script for it: https://plugmixer.sunwj.com/"
 		],
 		messageInterval: 10,
 		songstats: false,
