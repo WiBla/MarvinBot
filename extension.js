@@ -370,6 +370,94 @@
 				}
 			}
 		};
+		bot.commands.waitlistBanCommand = {
+			command: ['wlban', 'wlBan', 'waitlistban', 'waitlistBan'],
+			rank: 'bouncer',
+			type: 'startsWith',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				if (chat.message === cmd) return API.sendChat(`/me [@${chat.un}] Please provide a user and duration.`);
+				else {
+					let cmdRegEx = /(?: @?)(.*\b)(?:( [smlf]$)|(15mins?|15m|(?:one|une|1)? ?(?:hour|heure)|1?h)|((?:one|un|1)? ?(?:day|jour))|(forever|toujours?))/gi;
+					let match = cmdRegEx.exec(chat.message);
+
+					if (match === null) return API.sendChat(`/me [@${chat.un} something went wrong, are you sure you specified a correct user and duration?`);
+
+					let ID = match[1];
+
+					if (isNaN(ID)) {
+						let users = API.getUsers();
+						for (var i = 0; i < users.length; i++) {
+							if (users[i].username === ID) ID = users[i].id;
+						}
+						if (isNaN(ID)) return API.sendChat(`/me [@${chat.un}] Wrong user specified. Is that user ghosting?`);
+					}
+
+					// If we're not using s,m,l, or f
+					if (match[3] === '') {
+						// The regExp is build in a way that each duration has its own match so we just see the one that isn't empty and correlate the wanted duration
+						if (match[4] !== '') duration = 's';
+						else if (match[5] !== '') duration = 'm';
+						else if (match[6] !== '') duration = 'l';
+						else if (match[7] !== '') duration = 'l';
+					}
+
+					if (duration === 'f' && (API.getUser(chat.uid).role < 3 && API.getUser(chat.uid).gRole === 0))
+						API.sendChat(`/me [@${chat.un}] You do not have sufficent permissions to ban a user indefinitely.`);
+
+					$.ajax({
+						url: '/_/booth/waitlistban',
+						type: 'POST',
+						data: JSON.stringify({'userID':ID,'reason':1,'duration':duration}),
+						contentType: 'application/json',
+						error: function(err) {
+							switch(err.responseJSON.data[0]) {
+								case 'You are not authorized to access this resource.':
+									API.sendChat(`/me [@${chat.un}] I am somehow not authorized to do this :thinking:`);
+								break;
+
+								case 'Not a valid ban duration':
+									API.sendChat(`/me [@${chat.un}] Please make sure that the duration of the ban is correct.`);
+								break;
+
+								case 'Not a valid ban reason':
+									API.sendChat(`/me [@${chat.un}] Please make sure that the reason of the ban is correct.`);
+								break;
+
+								case 'Not in a room':
+									console.error('Trying to waitlist ban while not being in a room?!');
+								break;
+
+								case 'Nice try buddy, bouncers can\'t perm ban':
+									API.sendChat(`/me [@${chat.un}] As a bouncer, I cannot permanently ban a user.`);
+								break;
+
+								case 'That user is too powerful to ban':
+									API.sendChat(`/me [@${chat.un}] Trying to ban an Admin/BA ? Well no luck here..`);
+								break;
+
+								case 'Cannot ban a >= ranking user':
+									API.sendChat(`/me [@${chat.un}] You can't ban users with an equal or higher rank than you!`);
+								break;
+
+								case 'Not a moderator':
+									API.sendChat(`/me [@${chat.un}] I need to be bouncer minimum to perform this action.`);
+								break;
+
+								case 'Trying to ban yourself?':
+									API.sendChat(`/me [@${chat.un}] Hey! Don't try to ban me!`);
+								break;
+
+								default:
+									API.sendChat(`/me [@${chat.un}] An error occured, please try again.`);
+								break;
+							}
+						}
+					});
+				}
+			}
+		};
 		bot.commands.linkCommand = {
 			command: 'link',
 			rank: 'user',
@@ -609,6 +697,18 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
 					API.sendChat('https://i.imgur.com/eZV5Hc5.png');
+				}
+			}
+		};
+		bot.commands.diy = {
+			command: 'diy',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					API.sendChat('For useful informations about how to get started on plug.dj, check this guide: https://goo.gl/qcYqFz');
 				}
 			}
 		};
@@ -877,7 +977,7 @@
 			["indispo", "The song you played was not available for some users. "],
 			["troll", "We do not allow this type of music/video."]
 		],
-		afkpositionCheck: 0,
+		afkpositionCheck: 50,
 		afkRankCheck: "admin",
 		motdEnabled: false,
 		motdInterval: 5,
@@ -890,7 +990,7 @@
 		themeLink: "https://i.imgur.com/2riDvuR.png",
 		fbLink: null,
 		youtubeLink: null,
-		discordLink: "https://discord.gg/eJGAVBT",
+		discordLink: "https://discord.gg/9GPAeYF",
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
 			"Join us on discord ! https://discord.gg/eJGAVBT",
