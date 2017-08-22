@@ -30,6 +30,13 @@
 		'%%DJ%%, %%USER%% is dancing his feet of this track !',
 		'"%%DJ%% DUDE, this is awesome !" -from %%USER%%'
 	];
+	var propsStrings = [
+		"%%DJ%% Aye mate, %%USER%% says props to you for your play!",
+		"[%%USER%%] %%DJ%% Damn, you're on :fire:!",
+		"%%DJ%%, %%USER%% thinks you're a great DJ!",
+		"%%DJ%%, if %%USER%% could buy you flowers 💐, they would! (That means you're a good DJ!)",
+		"Hey %%DJ%%, I think %%USER%% really likes you 😘"
+	];
 	var modules = {
 		roomInfo: _.find(require.s.contexts._.defined,m=>m&&m.attributes&&m.attributes.shouldCycle)
 	};
@@ -114,6 +121,59 @@
 		} else if (!shouldCycle && API.getUsers().length < 9) {
 			API.moderateDJCycle(true);
 		}
+	}
+	function waitlistBan(ID, duration, reason) {
+		if (typeof reason === 'undefined') reason = 1;
+
+		$.ajax({
+			url: '/_/booth/waitlistban',
+			type: 'POST',
+			data: JSON.stringify({'userID':ID,'reason':reason,'duration':duration}),
+			contentType: 'application/json',
+			error: function(err) {
+				switch(err.responseJSON.data[0]) {
+					case 'You are not authorized to access this resource.':
+						API.sendChat(`/me [@${chat.un}] I am somehow not authorized to do this :thinking:`);
+					break;
+
+					case 'Not a valid ban duration':
+						API.sendChat(`/me [@${chat.un}] Please make sure that the duration of the ban is correct.`);
+					break;
+
+					case 'Not a valid ban reason':
+						API.sendChat(`/me [@${chat.un}] Please make sure that the reason of the ban is correct.`);
+					break;
+
+					case 'Not in a room':
+						console.error('Trying to waitlist ban while not being in a room?!');
+					break;
+
+					case 'Nice try buddy, bouncers can\'t perm ban':
+						API.sendChat(`/me [@${chat.un}] As a bouncer, I cannot permanently ban a user.`);
+					break;
+
+					case 'That user is too powerful to ban':
+						API.sendChat(`/me [@${chat.un}] Trying to ban an Admin/BA ? Well no luck here..`);
+					break;
+
+					case 'Cannot ban a >= ranking user':
+						API.sendChat(`/me [@${chat.un}] You can't ban users with an equal or higher rank than you!`);
+					break;
+
+					case 'Not a moderator':
+						API.sendChat(`/me [@${chat.un}] I need to be bouncer minimum to perform this action.`);
+					break;
+
+					case 'Trying to ban yourself?':
+						API.sendChat(`/me [@${chat.un}] Hey! Don't try to ban me!`);
+					break;
+
+					default:
+						API.sendChat(`/me [@${chat.un}] An error occured, please try again.`);
+					break;
+				}
+			}
+		});
 	}
 	// Pendu
 	String.prototype.replaceAt=function(index, replacement) {
@@ -385,6 +445,7 @@
 					if (match === null) return API.sendChat(`/me [@${chat.un} something went wrong, are you sure you specified a correct user and duration?`);
 
 					let ID = match[1];
+					let duration = '';
 
 					if (isNaN(ID)) {
 						let users = API.getUsers();
@@ -403,58 +464,12 @@
 						else if (match[7] !== '') duration = 'l';
 					}
 
+					if ('smlf'.indexOf(duration) === -1) duration = 's';
+
 					if (duration === 'f' && (API.getUser(chat.uid).role < 3 && API.getUser(chat.uid).gRole === 0))
 						API.sendChat(`/me [@${chat.un}] You do not have sufficent permissions to ban a user indefinitely.`);
 
-					$.ajax({
-						url: '/_/booth/waitlistban',
-						type: 'POST',
-						data: JSON.stringify({'userID':ID,'reason':1,'duration':duration}),
-						contentType: 'application/json',
-						error: function(err) {
-							switch(err.responseJSON.data[0]) {
-								case 'You are not authorized to access this resource.':
-									API.sendChat(`/me [@${chat.un}] I am somehow not authorized to do this :thinking:`);
-								break;
-
-								case 'Not a valid ban duration':
-									API.sendChat(`/me [@${chat.un}] Please make sure that the duration of the ban is correct.`);
-								break;
-
-								case 'Not a valid ban reason':
-									API.sendChat(`/me [@${chat.un}] Please make sure that the reason of the ban is correct.`);
-								break;
-
-								case 'Not in a room':
-									console.error('Trying to waitlist ban while not being in a room?!');
-								break;
-
-								case 'Nice try buddy, bouncers can\'t perm ban':
-									API.sendChat(`/me [@${chat.un}] As a bouncer, I cannot permanently ban a user.`);
-								break;
-
-								case 'That user is too powerful to ban':
-									API.sendChat(`/me [@${chat.un}] Trying to ban an Admin/BA ? Well no luck here..`);
-								break;
-
-								case 'Cannot ban a >= ranking user':
-									API.sendChat(`/me [@${chat.un}] You can't ban users with an equal or higher rank than you!`);
-								break;
-
-								case 'Not a moderator':
-									API.sendChat(`/me [@${chat.un}] I need to be bouncer minimum to perform this action.`);
-								break;
-
-								case 'Trying to ban yourself?':
-									API.sendChat(`/me [@${chat.un}] Hey! Don't try to ban me!`);
-								break;
-
-								default:
-									API.sendChat(`/me [@${chat.un}] An error occured, please try again.`);
-								break;
-							}
-						}
-					});
+					waitlistBan(ID, duration);
 				}
 			}
 		};
@@ -676,6 +691,30 @@
 				}
 			}
 		};
+		bot.commands.props = {
+			command: 'props',
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					var users = {
+						dj: '@'+API.getDJ().username,
+						user: '@'+chat.un
+					}
+					var string = propsStrings[Math.floor(Math.random()*propsStrings.length)];
+
+					// Self proping are you ?
+					if (users.dj === users.user) return API.sendChat(`/me You shall not give yourself props ${users.dj}.`);
+
+					for (var key in users) {
+						string = string.split('%%'+key.toUpperCase()+'%%').join(users[key]);
+					}
+					API.sendChat(`/me ${string}`);
+				}
+			}
+		};
 		bot.commands.info = {
 			command: 'info',
 			rank: 'user',
@@ -788,9 +827,16 @@
 			}
 		});
 		API.on(API.ADVANCE, function(e) {
+			// I know I know.. It's ugly but ain't nobody got time for dat
 			if (e.media.title.toLowerCase().indexOf('nightcore') != -1 || e.media.author.toLowerCase().indexOf('nightcore') != -1) {
 				API.sendChat('/me [@'+e.dj.username+'] nightcore is not allowed. Skipping..');
 				bot.roomUtilities.smartSkip();
+			} else if (e.media.title.toLowerCase().indexOf('ear rape') != -1 || e.media.author.toLowerCase().indexOf('ear rape') != -1) {
+				API.sendChat('/me [@'+e.dj.username+'] Ear rape I see? Pathetic..');
+				waitlistBan(e.dj.id, 'f', 1);
+			} else if (e.media.title.toLowerCase().indexOf('gemidão do zap') != -1 || e.media.author.toLowerCase().indexOf('gemidão do zap') != -1) {
+				API.sendChat('/me [@'+e.dj.username+'] Ear rape I see? Pathetic..');
+				waitlistBan(e.dj.id, 'f', 1);
 			} else if (e.media.format === 2) {
 				SC.get('/tracks/' + e.media.cid).catch((error) => {
 					if (error.status === 404) {
@@ -912,21 +958,15 @@
 					API.sendChat(`/me Second Warning @${dj.username}, please check your playlists or you will be removed.`);
 				break;
 				case 4:
+					bot.settings.smartSkip = false;
 					API.moderateForceQuit();
-					API.sendChat(`/me @${dj.username} you have been removed from the waitlist for having too many songs in history. If this happens once more, you will be banned for one hour.`);
+					API.sendChat(`/me @${dj.username} you have been removed from the waitlist for having too many songs in history. If this happens once more, you will be waitlist banned for one hour.`);
+					bot.settings.smartSkip = true;
 				break;
 				default:
-					$.ajax({
-						type: 'POST',
-						url: '/_/bans/add',
-						data: JSON.stringify({
-							'userID': dj.id,
-							'reason': 4,
-							'duration': 'h'
-						}),
-						dataType: 'json',
-						contentType: 'application/json'
-					});
+					bot.settings.smartSkip = false;
+					waitlistBan(dj.id, 'm', 4);
+					bot.settings.smartSkip = true;
 				break;
 			}
 		});
@@ -947,8 +987,10 @@
 		autoskip: true,
 		smartSkip: true,
 		cmdDeletion: true,
+		afkRemoval: false,
 		maximumAfk: 60,
-		afkRemoval: true,
+		afkpositionCheck: 50,
+		afkRankCheck: "admin",
 		maximumDc: 120,
 		bouncerPlus: true,
 		blacklistEnabled: true,
@@ -965,11 +1007,11 @@
 		autodisable: false,
 		commandCooldown: 5,
 		usercommandsEnabled: true,
-		thorCommand: false,
+		thorCommand: true,
     thorCooldown: 15,
 		skipPosition: 3,
 		skipReasons: [
-			["theme", "This song does not fit the room theme: http://i.imgur.com/dxfQpy5.png"],
+			["theme", "This song does not fit the room theme: "+this.themeLink],
 			["op", "This song is on the OP list."],
 			["history", "This song is in the history."],
 			["sound", "The song you played had bad sound quality or no sound."],
@@ -977,8 +1019,6 @@
 			["indispo", "The song you played was not available for some users. "],
 			["troll", "We do not allow this type of music/video."]
 		],
-		afkpositionCheck: 50,
-		afkRankCheck: "admin",
 		motdEnabled: false,
 		motdInterval: 5,
 		motd: "",
@@ -993,17 +1033,16 @@
 		discordLink: "https://discord.gg/9GPAeYF",
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
-			"Join us on discord ! https://discord.gg/eJGAVBT",
+			"Join us on discord ! "+this.discordLink,
 			"Give the !loto a try, you can win up to 225K PP !! :gift:",
 			"If you have any feedback, feel free to hit us on Discord or in the chat !",
 			"Our favorite autowoot https://github.com/Plug-It",
-			"Remember to put the room in your favorite if we deserve it ! <3",
+			"https://i.imgur.com/ji5Uzkg.gif Remember to put the room in your favorite if we deserve it ! ♥",
 			":warning: If your songs has more than 5 mehs, it will be skipped !",
 			"The DJ rotation is automaticly enabled if there are less than 10 users :)",
 			"Invite your friends ! The more people, the more fun !",
 			"You can play music up to 7min 30sec. After that, it will be skipped !",
 			"Try the !pendu if you're in a gaming mood !",
-			"Please do not stay afk with autojoin on for longer than an hour !",
 			"Try to shuffle your playlists as much as possible, here's a great script for it: https://plugmixer.sunwj.com/"
 		],
 		messageInterval: 10,
