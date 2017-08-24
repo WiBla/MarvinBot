@@ -974,7 +974,7 @@
 		bot.loadChat();
 	}
 
-	localStorage.setItem("basicBotsettings", JSON.stringify({
+	var settings = {
 		botName: "MarvinBot",
 		language: "english",
 		chatLink: "https://rawgit.com/WiBla/custom/master/lang/en.json",
@@ -1011,7 +1011,6 @@
     thorCooldown: 15,
 		skipPosition: 3,
 		skipReasons: [
-			["theme", "This song does not fit the room theme: "+this.themeLink],
 			["op", "This song is on the OP list."],
 			["history", "This song is in the history."],
 			["sound", "The song you played had bad sound quality or no sound."],
@@ -1033,7 +1032,6 @@
 		discordLink: "https://discord.gg/9GPAeYF",
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
-			"Join us on discord ! "+this.discordLink,
 			"Give the !loto a try, you can win up to 225K PP !! :gift:",
 			"If you have any feedback, feel free to hit us on Discord or in the chat !",
 			"Our favorite autowoot https://github.com/Plug-It",
@@ -1053,7 +1051,10 @@
 			OP: "https://rawgit.com/WiBla/custom/master/blacklists/OPlist.json",
 			BANNED: "https://rawgit.com/WiBla/custom/master/blacklists/BANNEDlist.json"
 		}
-	}));
+	};
+	settings.skipReasons.push(["theme", "This song does not fit the room theme: "+settings.themeLink]);
+	settings.intervalMessages.push("Join us on discord ! "+settings.discordLink);
+	localStorage.setItem("basicBotsettings", JSON.stringify(settings));
 
 	$.getScript("https://rawgit.com/bscBot/source/master/basicBot.js", extend);
 }).call(this);
