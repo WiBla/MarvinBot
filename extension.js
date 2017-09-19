@@ -122,26 +122,27 @@
 			API.moderateDJCycle(true);
 		}
 	}
-	function waitlistBan(ID, duration, reason) {
-		if (typeof reason === 'undefined') reason = 1;
+	function waitlistBan(options, callback) {
+		if (typeof options.reason === 'undefined') options.reason = 1;
 
 		$.ajax({
 			url: '/_/booth/waitlistban',
 			type: 'POST',
-			data: JSON.stringify({'userID':ID,'reason':reason,'duration':duration}),
+			data: JSON.stringify({'userID':options.ID,'reason':options.reason,'duration':options.duration}),
 			contentType: 'application/json',
 			error: function(err) {
+				if (typeof callback !== 'function') return;
 				switch(err.responseJSON.data[0]) {
 					case 'You are not authorized to access this resource.':
-						API.sendChat(`/me [@${chat.un}] I am somehow not authorized to do this :thinking:`);
+						callback("/me [@%%USER%%] I am somehow not authorized to do this :thinking:");
 					break;
 
 					case 'Not a valid ban duration':
-						API.sendChat(`/me [@${chat.un}] Please make sure that the duration of the ban is correct.`);
+						callback("/me [@%%USER%%] Please make sure that the duration of the ban is correct.");
 					break;
 
 					case 'Not a valid ban reason':
-						API.sendChat(`/me [@${chat.un}] Please make sure that the reason of the ban is correct.`);
+						callback("/me [@%%USER%%] Please make sure that the reason of the ban is correct.");
 					break;
 
 					case 'Not in a room':
@@ -149,27 +150,27 @@
 					break;
 
 					case 'Nice try buddy, bouncers can\'t perm ban':
-						API.sendChat(`/me [@${chat.un}] As a bouncer, I cannot permanently ban a user.`);
+						callback("/me [@%%USER%%] As a bouncer, I cannot permanently ban a user.");
 					break;
 
 					case 'That user is too powerful to ban':
-						API.sendChat(`/me [@${chat.un}] Trying to ban an Admin/BA ? Well no luck here..`);
+						callback("/me [@%%USER%%] Trying to ban an Admin/BA ? Well no luck here..");
 					break;
 
 					case 'Cannot ban a >= ranking user':
-						API.sendChat(`/me [@${chat.un}] You can't ban users with an equal or higher rank than you!`);
+						callback("/me [@%%USER%%] You can't ban users with an equal or higher rank than you!");
 					break;
 
 					case 'Not a moderator':
-						API.sendChat(`/me [@${chat.un}] I need to be bouncer minimum to perform this action.`);
+						callback("/me [@%%USER%%] I need to be bouncer minimum to perform this action.");
 					break;
 
 					case 'Trying to ban yourself?':
-						API.sendChat(`/me [@${chat.un}] Hey! Don't try to ban me!`);
+						callback("/me [@%%USER%%] Hey! Don't try to ban me!");
 					break;
 
 					default:
-						API.sendChat(`/me [@${chat.un}] An error occured, please try again.`);
+						callback("/me [@%%USER%%] An error occured, please try again.");
 					break;
 				}
 			}
@@ -178,7 +179,7 @@
 	// Pendu
 	String.prototype.replaceAt=function(index, replacement) {
 		return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
-	}
+	};
 	const words = ['chorus', 'clef', 'maestro', 'piano', 'music', 'symphony', 'rythm', 'requiem', 'serenade', 'sonata', 'soprano', 'vibrato', 'virtuoso', 'table', 'television', 'drawer', 'computer', 'laptop', 'house', 'church', 'fruits', 'vegetable', 'speakers', 'games', 'keyboard', 'coins', 'money', 'happy', 'share', 'disco', 'country', 'paper', 'magnetophone', 'xylophone', 'guitare'];
 	const abc = 'abcdefghijklmnopqrstuvwxyz';
 	var penduActive = false;
@@ -207,14 +208,14 @@
 		secret = '';
 		guess = 10;
 		guessed = [];
-		hangMessaged.forEach((e,i,a) => {API.moderateDeleteChat(e)});
+		hangMessaged.forEach((e,i,a) => {API.moderateDeleteChat(e);});
 		hangMessaged = [];
 	}
 
 	Number.prototype.spaceOut = function() {
 		if (isNaN(this) || this < 999) return this;
 		return (this).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-	}
+	};
 	API.moderateForceQuit = function() {
 		if (API.hasPermission(null, API.ROLE.BOUNCER)) {
 			$.ajax({
@@ -466,10 +467,13 @@
 
 					if ('smlf'.indexOf(duration) === -1) duration = 's';
 
-					if (duration === 'f' && (API.getUser(chat.uid).role < 3 && API.getUser(chat.uid).gRole === 0))
+					if (duration === 'f' && (API.getUser(chat.uid).role < API.ROLE.MANAGER && API.getUser(chat.uid).gRole === API.ROLE.NONE))
 						API.sendChat(`/me [@${chat.un}] You do not have sufficent permissions to ban a user indefinitely.`);
 
-					waitlistBan(ID, duration);
+					waitlistBan(
+						{ID: ID, duration: duration},
+						(error) => API.sendChat(error.split('%%USER%%').join(chat.un))
+					);
 				}
 			}
 		};
@@ -567,7 +571,7 @@
 					API.sendChat('This image will get you started on plug: https://i.imgur.com/ZeRR07N.png');
 				}
 			}
-		}
+		};
 		bot.commands.bot = {
 			command: 'bot',
 			rank: 'bouncer',
@@ -581,6 +585,20 @@
 					var name = msg.substr(cmd.length + 1);
 					if (msg.length > cmd.length + 1) {
 						API.sendChat("/me " + name + ", I am a bot, you can try to talk to me but I won't answer unless you use commands.");
+					}
+				}
+			}
+		};
+		bot.commands.staff = {
+			command: 'staff',
+			rank: 'user',
+			type: 'startsWith',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					if (API.getUsers().filter(u => (u.role >= API.ROLE.MANAGER && u.id !== 5285179)).length > 0) {
+						API.sendChat(`/me [@${chat.un}] @staff ${chat.message.substr(cmd.length + 1)}`);
 					}
 				}
 			}
@@ -678,7 +696,7 @@
 					var users = {
 						dj: '@'+API.getDJ().username,
 						user: '@'+chat.un
-					}
+					};
 					var string = tuneStrings[Math.floor(Math.random()*tuneStrings.length)];
 
 					// Self tuning your own track are you ?
@@ -702,7 +720,7 @@
 					var users = {
 						dj: '@'+API.getDJ().username,
 						user: '@'+chat.un
-					}
+					};
 					var string = propsStrings[Math.floor(Math.random()*propsStrings.length)];
 
 					// Self proping are you ?
@@ -723,7 +741,7 @@
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
-					API.sendChat(`J'ai ${API.getUser().pp.spaceOut()}pp, ${API.getUser().xp.spaceOut()}xp, je suis au niveau ${API.getUser().level} [${$('.info .bar .value')[0].innerText} xp]`);
+					API.sendChat(`I have ${API.getUser().pp.spaceOut()}PP, ${API.getUser().xp.spaceOut()}XP, I am level ${API.getUser().level} [${$('.info .bar .value')[0].innerText} XP]`);
 				}
 			}
 		};
@@ -818,15 +836,10 @@
 				}
 			}
 		};
-		API.on(API.SCORE_UPDATE, function(score) {
-			if (score.negative < bot.settings.voteSkipLimit) return;
-
-			if (bot.settings.voteSkip) {
-				API.sendChat("/me Too many mehs, skipping..");
-				API.moderateForceSkip();
-			}
-		});
 		API.on(API.ADVANCE, function(e) {
+			// if no media, no need to check
+			if (typeof e.media === 'undefined') return;
+
 			// I know I know.. It's ugly but ain't nobody got time for dat
 			if (e.media.title.toLowerCase().indexOf('nightcore') != -1 || e.media.author.toLowerCase().indexOf('nightcore') != -1) {
 				API.sendChat('/me [@'+e.dj.username+'] nightcore is not allowed. Skipping..');
@@ -857,38 +870,61 @@
 					}, limit*1000, e);
 				}
 			}
-		});
-		API.on(API.CHAT_COMMAND, function(cmd) {
-			if (cmd == '/exportchat') {
-				var logs = JSON.parse(localStorage.getItem('basicBotRoom'));
-				logs = logs.chatMessages;
 
-				var log = '';
-				for (var i=0; i<logs.length; i++) {
-				  log += '['+logs[i].join('] [')+']\n';
-				}
+			var media = e.media;
+			var history = API.getHistory();
+			var dj = e.dj;
+			var warns = 0;
 
-				var dl = document.createElement('a');
-				dl.href = 'data:attachment/text,' + encodeURI(log);
-				dl.target = '_blank';
-				dl.download = 'log.txt';
-				dl.click();
-		  }
-		});
-		API.on(API.USER_JOIN, function(user) {
-			toggleCycle();
-		});
-		API.on(API.USER_LEAVE, function(user) {
-			toggleCycle();
+			// i = 1 to jump the first item being the current song
+			for (var i = 1; i < history.length; i++) {
+				if (media.format == history[i].media.format && media.cid == history[i].media.cid)
+					warns++;
+			}
+
+			switch(warns) {
+				case 0: break;
+
+				case 1:
+					API.sendChat(`/me First Warning @${dj.username}, you have two songs in history, if this continue, you will be removed from the waitlist.`);
+				break;
+
+				case 2:
+					API.sendChat(`/me Second Warning @${dj.username}, please check your playlists or you will be removed.`);
+				break;
+
+				case 3:
+					bot.settings.smartSkip = false;
+					API.moderateForceQuit();
+					API.sendChat(`/me @${dj.username} you have been removed from the waitlist for having too many songs in history. If this happens once more, you will be waitlist banned for 15 minutes.`);
+					setTimeout(() => bot.settings.smartSkip = true, 10*1000);
+				break;
+
+				default:
+					bot.settings.smartSkip = false;
+					waitlistBan({
+						ID: dj.id,
+						duration: 's',
+						reason: 4
+					});
+					setTimeout(() => bot.settings.smartSkip = true, 10*1000);
+				break;
+			}
 		});
 		API.on(API.CHAT, function(msg) {
 			// Auto-delete socket app promotion
 			if (
-				msg.type === "emote" &&
 				msg.message.indexOf('http://socket.dj') !== -1 &&
 				API.hasPermission(null, API.ROLE.BOUNCER)
 			) {
 				API.moderateDeleteChat(msg.cid);
+			} else if (
+				/((http(?:s)?:\/\/(?:[a-z]+\.)*)?plug\.dj\/)(?!enjoy-the-drop$|about$|ba$|forgot-password$|founders$|giftsub\/\d|jobs$|legal$|merch$|partners$|plot$|privacy$|purchase$|subscribe$|team$|terms$|press$|_\/|@\/|!\/)(.+)/i
+				.test(msg.message) &&
+				!API.hasPermission(msg.uid, API.ROLE.BOUNCER)
+			) {
+				API.moderateDeleteChat(msg.cid);
+				API.sendChat(`/me [@${msg.un}] You are not allowed to post other room links.`);
 			}
 			if (msg.type === 'log' || msg.type === 'emote') return;
 			if (msg.uid === API.getUser().id) hangMessaged.push(msg.cid);
@@ -933,43 +969,33 @@
 				}
 			}
 		});
-		API.on(API.HISTORY_UPDATE, function(history) {
-			let media = API.getMedia();
-			let dj = API.getDJ();
-			var warns = 0;
+		API.on(API.CHAT_COMMAND, function(cmd) {
+			if (cmd == '/exportchat') {
+				var logs = JSON.parse(localStorage.getItem('basicBotRoom'));
+				logs = logs.chatMessages;
 
-			// if no media, no need to check
-			if (typeof media === 'undefined') return;
-			// i = 1 to jump the first item being the current song
-			for (var i = 1; i < history.length; i++) {
-				if (media.format == history[i].media.format && media.cid == history[i].media.cid)
-					warns++;
-			}
+				var log = '';
+				for (var i=0; i<logs.length; i++) {
+				  log += '['+logs[i].join('] [')+']\n';
+				}
 
-			switch(warns) {
-				case 0:
-				case 1:
-					return;
-				break;
-				case 2:
-					API.sendChat(`/me First Warning @${dj.username}, you have two songs in history, if this continue, you will be removed from the waitlist.`);
-				break;
-				case 3:
-					API.sendChat(`/me Second Warning @${dj.username}, please check your playlists or you will be removed.`);
-				break;
-				case 4:
-					bot.settings.smartSkip = false;
-					API.moderateForceQuit();
-					API.sendChat(`/me @${dj.username} you have been removed from the waitlist for having too many songs in history. If this happens once more, you will be waitlist banned for one hour.`);
-					bot.settings.smartSkip = true;
-				break;
-				default:
-					bot.settings.smartSkip = false;
-					waitlistBan(dj.id, 'm', 4);
-					bot.settings.smartSkip = true;
-				break;
+				var dl = document.createElement('a');
+				dl.href = 'data:attachment/text,' + encodeURI(log);
+				dl.target = '_blank';
+				dl.download = 'log.txt';
+				dl.click();
+		  }
+		});
+		API.on(API.SCORE_UPDATE, function(score) {
+			if (score.negative < bot.settings.voteSkipLimit) return;
+
+			if (bot.settings.voteSkip) {
+				API.sendChat("/me Too many mehs, skipping..");
+				API.moderateForceSkip();
 			}
 		});
+		API.on(API.USER_JOIN, () => toggleCycle());
+		API.on(API.USER_LEAVE, () => toggleCycle());
 
 		bot.loadChat();
 	}
@@ -1011,12 +1037,12 @@
     thorCooldown: 15,
 		skipPosition: 3,
 		skipReasons: [
-			["op", "This song is on the OP list."],
-			["history", "This song is in the history."],
-			["sound", "The song you played had bad sound quality or no sound."],
+			["history",     "This song is in the history."],
+			["sound",       "The song you played had bad sound quality or no sound."],
 			["unavailable", "The song you played was not available for some users."],
-			["indispo", "The song you played was not available for some users. "],
-			["troll", "We do not allow this type of music/video."]
+			["indispo",     "The song you played was not available for some users. "],
+			["troll",       "We do not allow this type of music/video."],
+			["nsfw",        "The song you played contained not safe for work content."]
 		],
 		motdEnabled: false,
 		motdInterval: 5,
