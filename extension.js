@@ -1,12 +1,135 @@
 (function(){
-	const fork = "WiBla";
+	const YTAPIkey = 'AIzaSyC8pk0f57a_UcAIbHdrvRhsmHSG1KZk2SM';
+	const giphyKey = 'dc6zaTOxFJmzC';
+	const roomRE = /(plug\.dj\/)(?!enjoy-the-drop\b|about\b|ba\b|forgot-password\b|founders\b|giftsub\/\d|jobs\b|legal\b|merch\b|partners\b|plot\b|privacy\b|purchase\b|subscribe\b|team\b|terms\b|press\b|_\/|@\/|!\/)(.+)/i;
+	const tuneStrings = [
+		"%%DJ%%, %%USER%% would like you to know that this is a great tune !",
+		"%%DJ%%, %%USER%% thinks this is an awesome track !",
+		"%%DJ%%, keep playing such great tracks because %%USER%% seems to like them !",
+		"%%USER%% absolutely love this music %%DJ%% !",
+		'%%DJ%%, %%USER%% is really enjoying this track !',
+		'%%DJ%%, %%USER%% is dancing his feet of this track !',
+		'"%%DJ%% DUDE, this is awesome !" -from %%USER%%'
+	];
+	const propsStrings = [
+		"%%DJ%% Aye mate, %%USER%% says props to you for your play!",
+		"[%%USER%%] %%DJ%% Damn, you're on :fire:!",
+		"%%DJ%%, %%USER%% thinks you're a great DJ!",
+		"%%DJ%%, if %%USER%% could buy you flowers 💐, they would! (That means you're a good DJ!)",
+		"Hey %%DJ%%, I think %%USER%% really likes you 😘"
+	];
+	const modules = {
+		roomInfo: _.find(require.s.contexts._.defined,m=>m&&m.attributes&&m.attributes.shouldCycle)
+	};
+	function getGiphyID(options, callback) {
+		$.getJSON("https://tv.giphy.com/v1/gifs/random?",
+			{
+				"format": "json",
+				"api_key": giphyKey,
+				"rating": options.rating,
+				"tag": options.fixedtag
+			},
+			function(response) {
+				callback(response.data.id);
+			}
+		);
+	}
+	function getRandomGiphyID(rating, callback) {
+		$.getJSON("https://tv.giphy.com/v1/gifs/random?",
+			{
+				"format": "json",
+				"api_key": giphyKey,
+				"rating": rating
+			},
+			function(response) {
+				callback(response.data.id);
+			}
+		);
+	}
+	function toggleCycle() {
+		let shouldCycle = modules.roomInfo.attributes.shouldCycle;
+
+		if ((shouldCycle && API.getUsers().length > 11) ||
+		    API.getWaitList().length === 0) {
+			API.moderateDJCycle(false);
+		} else if ((!shouldCycle && API.getUsers().length < 9) ||
+		    API.getWaitList().length > 2) {
+			API.moderateDJCycle(true);
+		}
+	}
+	function waitlistBan(options, callback) {
+		if (typeof options.reason === 'undefined') options.reason = 1;
+
+		$.ajax({
+			url: '/_/booth/waitlistban',
+			type: 'POST',
+			data: JSON.stringify({'userID':options.ID,'reason':options.reason,'duration':options.duration}),
+			contentType: 'application/json',
+			error: function(err) {
+				if (typeof callback !== 'function') return;
+				switch(err.responseJSON.data[0]) {
+					case 'You are not authorized to access this resource.':
+						callback('/me [@%%USER%%] I am somehow not authorized to do this :thinking:');
+					break;
+
+					case 'Not a valid ban duration':
+						callback('/me [@%%USER%%] Please make sure that the duration of the ban is correct.');
+					break;
+
+					case 'Not a valid ban reason':
+						callback('/me [@%%USER%%] Please make sure that the reason of the ban is correct.');
+					break;
+
+					case 'Not in a room':
+						console.error('Trying to waitlist ban while not being in a room?!');
+					break;
+
+					case 'Nice try buddy, bouncers can\'t perm ban':
+						callback('/me [@%%USER%%] As a bouncer, I cannot permanently ban a user.');
+					break;
+
+					case 'That user is too powerful to ban':
+						callback('/me [@%%USER%%] Trying to ban an Admin/BA ? Well no luck here..');
+					break;
+
+					case 'Cannot ban a >= ranking user':
+						callback('/me [@%%USER%%] You can\'t ban users with an equal or higher rank than you!');
+					break;
+
+					case 'Not a moderator':
+						callback('/me [@%%USER%%] I need to be bouncer minimum to perform this action.');
+					break;
+
+					case 'Trying to ban yourself?':
+						callback('/me [@%%USER%%] Hey! Don\'t try to ban me!');
+					break;
+
+					default:
+						callback('/me [@%%USER%%] An error occured, please try again.');
+					break;
+				}
+			}
+		});
+	}
+	API.moderateForceQuit = function() {
+		if (API.hasPermission(null, API.ROLE.BOUNCER)) {
+			$.ajax({
+				url: '/_/booth/remove/'+API.getDJ().id,
+				method: 'DELETE'
+			});
+		}
+	};
+	Number.prototype.spaceOut = function() {
+		if (isNaN(this) || this < 999) return this;
+		return (this).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+	};
+
+	// Loto stuff
 	window.cooldown = {
 		"gif": 0,
-		"loto": []
+		"loto": JSON.parse(localStorage.getItem('loto-CD'))
 	};
-	window.wins = [];
-	var lotoCDLS = localStorage.getItem('loto-CD');
-	var lotoWinsLS = localStorage.getItem('loto-Wins');
+	window.wins = JSON.parse(localStorage.getItem('loto-Wins'));
 	var emote = [
 		['💀',        0, 95],    // skull
 		['💊',        0, 95],    // pill
@@ -21,25 +144,6 @@
 		['👑',    10000, 99.95], // 0.05%
 		['🎁',    25000, 99.999] // 0.001%
 	];
-	var tuneStrings = [
-		"%%DJ%%, %%USER%% would like you to know that this is a great tune !",
-		"%%DJ%%, %%USER%% thinks this is an awesome track !",
-		"%%DJ%%, keep playing such great tracks because %%USER%% seems to like them !",
-		"%%USER%% absolutely love this music %%DJ%% !",
-		'%%DJ%%, %%USER%% is really enjoying this track !',
-		'%%DJ%%, %%USER%% is dancing his feet of this track !',
-		'"%%DJ%% DUDE, this is awesome !" -from %%USER%%'
-	];
-	var propsStrings = [
-		"%%DJ%% Aye mate, %%USER%% says props to you for your play!",
-		"[%%USER%%] %%DJ%% Damn, you're on :fire:!",
-		"%%DJ%%, %%USER%% thinks you're a great DJ!",
-		"%%DJ%%, if %%USER%% could buy you flowers 💐, they would! (That means you're a good DJ!)",
-		"Hey %%DJ%%, I think %%USER%% really likes you 😘"
-	];
-	var modules = {
-		roomInfo: _.find(require.s.contexts._.defined,m=>m&&m.attributes&&m.attributes.shouldCycle)
-	};
 	function loto(msg) {
 		var row1 = generateEmote();
 		var row2 = generateEmote();
@@ -109,74 +213,7 @@
 			return emote[Math.floor(Math.random()*6)];
 		}
 	}
-	function whatPercent(a,b) {
-		if (a>b) return a/b*100;
-		else return 100 / (b/a);
-	}
-	function toggleCycle() {
-		let shouldCycle = modules.roomInfo.attributes.shouldCycle;
-
-		if (shouldCycle && API.getUsers().length > 11) {
-			API.moderateDJCycle(false);
-		} else if (!shouldCycle && API.getUsers().length < 9) {
-			API.moderateDJCycle(true);
-		}
-	}
-	function waitlistBan(options, callback) {
-		if (typeof options.reason === 'undefined') options.reason = 1;
-
-		$.ajax({
-			url: '/_/booth/waitlistban',
-			type: 'POST',
-			data: JSON.stringify({'userID':options.ID,'reason':options.reason,'duration':options.duration}),
-			contentType: 'application/json',
-			error: function(err) {
-				if (typeof callback !== 'function') return;
-				switch(err.responseJSON.data[0]) {
-					case 'You are not authorized to access this resource.':
-						callback("/me [@%%USER%%] I am somehow not authorized to do this :thinking:");
-					break;
-
-					case 'Not a valid ban duration':
-						callback("/me [@%%USER%%] Please make sure that the duration of the ban is correct.");
-					break;
-
-					case 'Not a valid ban reason':
-						callback("/me [@%%USER%%] Please make sure that the reason of the ban is correct.");
-					break;
-
-					case 'Not in a room':
-						console.error('Trying to waitlist ban while not being in a room?!');
-					break;
-
-					case 'Nice try buddy, bouncers can\'t perm ban':
-						callback("/me [@%%USER%%] As a bouncer, I cannot permanently ban a user.");
-					break;
-
-					case 'That user is too powerful to ban':
-						callback("/me [@%%USER%%] Trying to ban an Admin/BA ? Well no luck here..");
-					break;
-
-					case 'Cannot ban a >= ranking user':
-						callback("/me [@%%USER%%] You can't ban users with an equal or higher rank than you!");
-					break;
-
-					case 'Not a moderator':
-						callback("/me [@%%USER%%] I need to be bouncer minimum to perform this action.");
-					break;
-
-					case 'Trying to ban yourself?':
-						callback("/me [@%%USER%%] Hey! Don't try to ban me!");
-					break;
-
-					default:
-						callback("/me [@%%USER%%] An error occured, please try again.");
-					break;
-				}
-			}
-		});
-	}
-	// Pendu
+	// Hangmann stuff
 	String.prototype.replaceAt=function(index, replacement) {
 		return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
 	};
@@ -208,31 +245,169 @@
 		secret = '';
 		guess = 10;
 		guessed = [];
-		hangMessaged.forEach((e,i,a) => {API.moderateDeleteChat(e);});
+		hangMessaged.forEach((cid) => {API.moderateDeleteChat(cid);});
 		hangMessaged = [];
 	}
+	// Live stuff
+	const playlistID = '10722938';
+	var errorState = 0;
+	function getCurrentLive(callback) {
+		$.ajax({
+			url: `/_/playlists/${playlistID}/media`,
+			method: 'GET',
+			dataType: 'json',
+			success: function(data) {
+				errorState = 0;
 
-	Number.prototype.spaceOut = function() {
-		if (isNaN(this) || this < 999) return this;
-		return (this).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-	};
-	API.moderateForceQuit = function() {
-		if (API.hasPermission(null, API.ROLE.BOUNCER)) {
-			$.ajax({
-				url: '/_/booth/remove/'+API.getDJ().id,
-				method: 'DELETE'
-			});
-		}
-	};
+				let medias = data.data;
+				medias.forEach((media) => {
+					if (media.duration === 86400) callback(media);
+				});
+			},
+			error: function() {
+				if (errorState === 0) {
+					getCurrentLive(callback);
+					errorState = 1;
+				} else {
+					API.sendChat('/me [Error @WiBla] Could not get Current live.');
+				}
+			}
+		});
+	}
+	function isUnavailable(media, callback) {
+		$.ajax({
+			url: `https://www.googleapis.com/youtube/v3/videos?id=${media.cid}&key=${YTAPIkey}&part=snippet,status`,
+			type: 'GET',
+			success: function(data) {
+				errorState = 0;
 
-	if (lotoCDLS !== null) cooldown.loto = JSON.parse(lotoCDLS);
-	if (lotoWinsLS !== null) wins = JSON.parse(lotoWinsLS);
+				if (data.items.length === 0 ||
+				    (data.items.length == 1 && ['processed', 'uploaded'].indexOf(data.items[0].status.uploadStatus) < 0)) {
+					callback(true, media);
+				}
+				else callback(false, media);
+			},
+			error: function() {
+				if (errorState === 0) {
+					isUnavailable(media, callback);
+					errorState = 1;
+				} else {
+					API.sendChat('/me [Error @WiBla] Could not check live availability.');
+				}
+			}
+		});
+	}
+	function deleteMedia(media, callback) {
+		$.ajax({
+			url: `/_/playlists/${playlistID}/media/delete`,
+			method: 'POST',
+			dataType: 'json',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				ids: [media.id]
+			}),
+			success: function() {
+				errorState = 0;
+
+				callback();
+			},
+			error: function() {
+				if (errorState === 0) {
+					deleteMedia(media, callback);
+					errorState = 1;
+				} else {
+					API.sendChat('/me [Error @WiBla] Could not delete current live.');
+				}
+			}
+		});
+	}
+	function getNewLive(callback) {
+		$.ajax({
+			url: 'https://content.googleapis.com/youtube/v3/search?'+
+				'type=video'+
+				'&eventType=live'+
+				'&q='+encodeURI('24/7 Monstercat Radio')+
+				'&maxResults=25'+
+				'&part=snippet'+
+				'&key=AIzaSyC8pk0f57a_UcAIbHdrvRhsmHSG1KZk2SM',
+			type: 'GET',
+			dataType: 'json',
+			contentType: 'application/json',
+			success: function(data) {
+				errorState = 0;
+
+				if (data.items.length === 0) return;
+				data.items.forEach((item) => {
+					if (item.snippet.channelId === "UCJ6td3C9QlPO9O_J5dF4ZzA") {
+						callback({
+							cid:    item.id.videoId,
+							author: item.snippet.title.split(' - ')[0],
+							title:  item.snippet.title.split(' - ').slice(1).join(' - '),
+							image:  item.snippet.thumbnails.default.url,
+							duration: 86400,
+							format: 1,
+							id: 1
+						});
+					}
+				});
+			},
+			error: function() {
+				if (errorState === 0) {
+					getNewLive(callback);
+					errorState = 1;
+				} else {
+					API.sendChat('/me [Error @WiBla] Could not get new live.');
+				}
+			}
+		});
+	}
+	function addMedia(media, callback) {
+		$.ajax({
+			url: `/_/playlists/${playlistID}/media/insert`,
+			method: 'POST',
+			dataType: 'json',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				media: [media],
+				append: false
+			}),
+			success: function() {
+				errorState = 0;
+
+				callback();
+			},
+			error: function() {
+				if (errorState === 0) {
+					addMedia(media, callback);
+					errorState = 1;
+				} else {
+					API.sendChat('/me [Error @WiBla] Could not add live.');
+				}
+			}
+		});
+	}
 
 	function extend() {
 		if (!window.bot) return setTimeout(extend, 1000);
 
 		var bot = window.bot;
 		bot.retrieveSettings();
+
+		function playLive() {
+			if (API.getWaitList().length !== 0 && API.getDJ() !== undefined) return;
+
+			bot.settings.smartSkip = false;
+			bot.settings.historySkip = false;
+			if (API.djJoin() === 0) {
+				API.once(API.WAIT_LIST_UPDATE, () => {
+					API.once(API.WAIT_LIST_UPDATE, () => {
+						bot.settings.smartSkip = true;
+						bot.settings.historySkip = true;
+						$.ajax({url:'/_/booth',type:'DELETE'});
+					});
+				});
+			}
+		}
 
 		bot.commands.gif18Command = {
 			command: ['gif18', 'giphy18'],
@@ -245,25 +420,11 @@
 				else {
 					var msg = chat.message;
 					if (msg.length !== cmd.length) {
-						function get_id(api_key, fixedtag, func) {
-							$.getJSON("https://tv.giphy.com/v1/gifs/random?",
-								{
-									"format": "json",
-									"api_key": api_key,
-									"rating": rating,
-									"tag": fixedtag
-								},
-								function(response) {
-									func(response.data.id);
-								}
-							);
-						}
-						var api_key = "dc6zaTOxFJmzC"; // public beta key
-						var rating = "nsfw";
 						var tag = msg.substr(cmd.length + 1);
 						var fixedtag = tag.replace(/ /g,"+");
 						var commatag = tag.replace(/ /g,", ");
-						get_id(api_key, tag, function(id) {
+
+						getGiphyID({rating: 'nsfw', fixedtag: fixedtag}, function(id) {
 							if (typeof id !== 'undefined') {
 								cooldown.gif = new Date().getTime();
 								API.sendChat('/me ['+chat.un+'] [Tags: '+commatag+'] http:\/\/i.giphy.com\/'+id+'.gif');
@@ -273,21 +434,7 @@
 						});
 					}
 					else {
-						function get_random_id(api_key, func) {
-							$.getJSON("https://tv.giphy.com/v1/gifs/random?",
-								{
-									"format": "json",
-									"api_key": api_key,
-									"rating": rating
-								},
-								function(response) {
-									func(response.data.id);
-								}
-							);
-						}
-						var api_key = "dc6zaTOxFJmzC"; // public beta key
-						var rating = "nsfw";
-						get_random_id(api_key, function(id) {
+						getRandomGiphyID('nsfw', function(id) {
 							if (typeof id !== 'undefined') {
 								cooldown.gif = new Date().getTime();
 								API.sendChat('/me ['+chat.un+'] [Random GIF] http:\/\/i.giphy.com\/'+id+'.gif');
@@ -310,25 +457,11 @@
 				else {
 					var msg = chat.message;
 					if (msg.length !== cmd.length) {
-						function get_id(api_key, fixedtag, func) {
-							$.getJSON("https://tv.giphy.com/v1/gifs/random?",
-								{
-									"format": "json",
-									"api_key": api_key,
-									"rating": rating,
-									"tag": fixedtag
-								},
-								function(response) {
-									func(response.data.id);
-								}
-							);
-						}
-						var api_key = "dc6zaTOxFJmzC"; // public beta key
-						var rating = "pg-13"; // PG 13 gifs
 						var tag = msg.substr(cmd.length + 1);
 						var fixedtag = tag.replace(/ /g,"+");
 						var commatag = tag.replace(/ /g,", ");
-						get_id(api_key, tag, function(id) {
+
+						getGiphyID({rating: 'pg-13', fixedtag: fixedtag}, function(id) {
 							if (typeof id !== 'undefined') {
 								cooldown.gif = new Date().getTime();
 								API.sendChat('/me ['+chat.un+'] [Tags: '+commatag+'] http:\/\/i.giphy.com\/'+id+'.gif');
@@ -338,21 +471,7 @@
 						});
 					}
 					else {
-						function get_random_id(api_key, func) {
-							$.getJSON("https://tv.giphy.com/v1/gifs/random?",
-								{
-									"format": "json",
-									"api_key": api_key,
-									"rating": rating
-								},
-								function(response) {
-									func(response.data.id);
-								}
-							);
-						}
-						var api_key = "dc6zaTOxFJmzC"; // public beta key
-						var rating = "pg-13"; // PG 13 gifs
-						get_random_id(api_key, function(id) {
+						getRandomGiphyID('pg-13', function(id) {
 							if (typeof id !== 'undefined') {
 								cooldown.gif = new Date().getTime();
 								API.sendChat('/me ['+chat.un+'] [Random GIF] http:\/\/i.giphy.com\/'+id+'.gif');
@@ -394,7 +513,6 @@
 						}
 					}
 
-					var from = chat.un;
 					if (typeof user === null) return API.sendChat('/me [@'+chat.un+'] No user specified.');
 
 					var permFrom = API.getUser(chat.uid).role;
@@ -842,18 +960,18 @@
 
 			// I know I know.. It's ugly but ain't nobody got time for dat
 			if (e.media.title.toLowerCase().indexOf('nightcore') != -1 || e.media.author.toLowerCase().indexOf('nightcore') != -1) {
-				API.sendChat('/me [@'+e.dj.username+'] nightcore is not allowed. Skipping..');
+				API.sendChat(`/me [@${e.dj.username}] nightcore is not allowed. Skipping..`);
 				bot.roomUtilities.smartSkip();
 			} else if (e.media.title.toLowerCase().indexOf('ear rape') != -1 || e.media.author.toLowerCase().indexOf('ear rape') != -1) {
-				API.sendChat('/me [@'+e.dj.username+'] Ear rape I see? Pathetic..');
-				waitlistBan(e.dj.id, 'f', 1);
+				API.sendChat(`/me [@${e.dj.username}] Ear rape I see? Pathetic.. @staff`);
+				waitlistBan({ID: e.dj.id, duration: 'f', reason: 3});
 			} else if (e.media.title.toLowerCase().indexOf('gemidão do zap') != -1 || e.media.author.toLowerCase().indexOf('gemidão do zap') != -1) {
-				API.sendChat('/me [@'+e.dj.username+'] Ear rape I see? Pathetic..');
-				waitlistBan(e.dj.id, 'f', 1);
+				API.sendChat(`/me [@${e.dj.username}] Ear rape I see? Pathetic.. @staff`);
+				waitlistBan({ID: e.dj.id, duration: 'f', reason: 3});
 			} else if (e.media.format === 2) {
 				SC.get('/tracks/' + e.media.cid).catch((error) => {
 					if (error.status === 404) {
-						API.sendChat('/me [@'+e.dj.username+'] this track is unavailable, please update your playlists and chose another song before you play again.');
+						API.sendChat(`/me [@${e.dj.username}] this track is unavailable, please update your playlists and chose another song before you play again.`);
 						bot.roomUtilities.smartSkip();
 					}
 				});
@@ -871,7 +989,7 @@
 				}
 			}
 
-			var media = e.media;
+			/*var media = e.media;
 			var history = API.getHistory();
 			var dj = e.dj;
 			var warns = 0;
@@ -909,7 +1027,7 @@
 					});
 					setTimeout(() => bot.settings.smartSkip = true, 10*1000);
 				break;
-			}
+			}*/
 		});
 		API.on(API.CHAT, function(msg) {
 			// Auto-delete socket app promotion
@@ -919,8 +1037,7 @@
 			) {
 				API.moderateDeleteChat(msg.cid);
 			} else if (
-				/((http(?:s)?:\/\/(?:[a-z]+\.)*)?plug\.dj\/)(?!enjoy-the-drop$|about$|ba$|forgot-password$|founders$|giftsub\/\d|jobs$|legal$|merch$|partners$|plot$|privacy$|purchase$|subscribe$|team$|terms$|press$|_\/|@\/|!\/)(.+)/i
-				.test(msg.message) &&
+				roomRE.test(msg.message) &&
 				!API.hasPermission(msg.uid, API.ROLE.BOUNCER)
 			) {
 				API.moderateDeleteChat(msg.cid);
@@ -996,6 +1113,30 @@
 		});
 		API.on(API.USER_JOIN, () => toggleCycle());
 		API.on(API.USER_LEAVE, () => toggleCycle());
+		API.on(API.WAIT_LIST_UPDATE, () => {
+			toggleCycle();
+			if (typeof window.wluInt !== 'undefined') clearTimeout(window.wluInt);
+			if (API.getWaitList().length !== 0 && API.getDJ() !== undefined) return;
+
+			window.wluInt = setTimeout(() => {
+				if (API.getWaitList().length !== 0 && API.getDJ() !== undefined) return;
+
+				getCurrentLive((media) => {
+					isUnavailable(media, (unavailable, media) => {
+						if (!unavailable) playLive();
+						else {
+							deleteMedia(media, () => {
+								getNewLive((newMedia) => {
+									addMedia(newMedia, () => {
+										playLive();
+									});
+								});
+							});
+						}
+					});
+				});
+			}, 2*60*1000);
+		});
 
 		bot.loadChat();
 	}
@@ -1035,7 +1176,7 @@
 		usercommandsEnabled: true,
 		thorCommand: true,
     thorCooldown: 15,
-		skipPosition: 3,
+		skipPosition: 2,
 		skipReasons: [
 			["history",     "This song is in the history."],
 			["sound",       "The song you played had bad sound quality or no sound."],
