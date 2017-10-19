@@ -21,13 +21,21 @@
 	const modules = {
 		roomInfo: _.find(require.s.contexts._.defined,m=>m&&m.attributes&&m.attributes.shouldCycle)
 	};
+	function subChat(chat, obj) {
+		if (typeof chat === 'undefined') return chat;
+		var lit = '%%';
+		for (var prop in obj) {
+			chat = chat.replace(lit + prop.toUpperCase() + lit, obj[prop]);
+		}
+		return chat;
+	}
 	function getGiphyID(options, callback) {
 		$.getJSON("https://tv.giphy.com/v1/gifs/random?",
 			{
-				"format": "json",
-				"api_key": giphyKey,
-				"rating": options.rating,
-				"tag": options.fixedtag
+				format: 'json',
+				api_key: giphyKey,
+				rating: options.rating,
+				tag: options.fixedtag
 			},
 			function(response) {
 				callback(response.data.id);
@@ -37,9 +45,9 @@
 	function getRandomGiphyID(rating, callback) {
 		$.getJSON("https://tv.giphy.com/v1/gifs/random?",
 			{
-				"format": "json",
-				"api_key": giphyKey,
-				"rating": rating
+				format: 'json',
+				api_key: giphyKey,
+				rating: rating
 			},
 			function(response) {
 				callback(response.data.id);
@@ -48,14 +56,11 @@
 	}
 	function toggleCycle() {
 		let shouldCycle = modules.roomInfo.attributes.shouldCycle;
+		let disableCycle = shouldCycle && API.getUsers().length >= 12;
+		let enableCycle = !shouldCycle && API.getUsers().length <= 8;
 
-		if ((shouldCycle && API.getUsers().length > 11) ||
-		    API.getWaitList().length === 0) {
-			API.moderateDJCycle(false);
-		} else if ((!shouldCycle && API.getUsers().length < 9) ||
-		    API.getWaitList().length > 2) {
-			API.moderateDJCycle(true);
-		}
+		if (disableCycle) API.moderateDJCycle(false);
+		else if (enableCycle) API.moderateDJCycle(true);
 	}
 	function waitlistBan(options, callback) {
 		if (typeof options.reason === 'undefined') options.reason = 1;
@@ -126,28 +131,41 @@
 
 	// Loto stuff
 	window.cooldown = {
-		"gif": 0,
-		"loto": JSON.parse(localStorage.getItem('loto-CD'))
+		gif: 0,
+		loto: JSON.parse(localStorage.getItem('loto-CD')) || []
 	};
-	window.wins = JSON.parse(localStorage.getItem('loto-Wins'));
-	var emote = [
-		['💀',        0, 95],    // skull
-		['💊',        0, 95],    // pill
-		['💣',        0, 95],    // bomb
-		['👾',        0, 95],    // space_invader
-		['📦',        0, 95],    // package
-		[':troll:',  0, 95],    // 95% chance to lose
-		['🍒',      500, 95],    // 5%
-		['🍇',     1000, 98],    // 2%
-		['⚡',     2000, 99.7],  // 0.3%
-		['🎲',     5000, 99.9],  // 0.1%
-		['👑',    10000, 99.95], // 0.05%
+	const lotoBlacklist = [4613422, 6553384];
+	const emote = [
+		// [Emote, value, %chance]
+		['💀',        0, 90],    // skull
+		['💊',        0, 90],    // pill
+		['💣',        0, 90],    // bomb
+		['👾',        0, 90],    // space_invader
+		['📦',        0, 90],    // package
+		[':troll:',  0, 90],    // 90% chance to lose
+		['🍒',      500, 90],    // 10%
+		['🍇',     1000, 96],    // 4%
+		['⚡',     2000, 99.4],  // 0.6%
+		['🎲',     5000, 99.8],  // 0.2%
+		['👑',    10000, 99.9],  // 0.1%
 		['🎁',    25000, 99.999] // 0.001%
 	];
+	function generateEmote(msg) {
+		let chanceMultiplier;
+		if (lotoBlacklist.indexOf(msg.uid) > -1) chanceMultiplier = 0;
+		else chanceMultiplier = 100;
+
+		let rdm = Math.random()*chanceMultiplier; // 0 - 99.999999999999999
+
+		for (let i = emote.length-1; i >= 0; i--) {
+			if (rdm >= emote[i][2]) return emote[i];
+			else if (i <= 5) return emote[Math.floor(Math.random()*6)];
+		}
+	}
 	function loto(msg) {
-		var row1 = generateEmote();
-		var row2 = generateEmote();
-		var row3 = generateEmote();
+		var row1 = generateEmote(msg);
+		var row2 = generateEmote(msg);
+		var row3 = generateEmote(msg);
 		var earn = row1[1] + row2[1] + row3[1];
 		row1 = row1[0];
 		row2 = row2[0];
@@ -171,51 +189,16 @@
 			}
 		}
 
-		if (earn <= 0) API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you lost, retry tomorrow !');
+		if (earn <= 0) API.sendChat(`/me ${row1}|${row2}|${row3} @${msg.un}, you lost, retry tomorrow !`);
 		else {
 			if (earn >= 1000) earn = (earn /= 1000) + 'k';
 
-			API.sendChat('/me '+row1+'|'+row2+'|'+row3+' @'+msg.un+', you won '+earn+'PP ! :tada:');
-
-			if (wins.length > 0) {
-				for (var i = 0; i < wins.length; i++) {
-					if (i+1 >= wins.length && msg.uid !== wins[i][1]) {
-						wins.push([msg.un, msg.uid, earn]);
-						return localStorage.setItem('loto-Wins', JSON.stringify(wins));
-					}
-					else if (msg.uid === wins[i][1]) {
-						wins[i][2] = earn;
-						return localStorage.setItem('loto-Wins', JSON.stringify(wins));
-					}
-				}
-			}	else {
-				wins.push([msg.un, msg.uid, earn]);
-				return localStorage.setItem('loto-Wins', JSON.stringify(wins));
-			}
-		}
-	}
-	function generateEmote() {
-		var rdm = Math.random()*100; // 0 - 99.999999999999999
-
-		if (rdm >= emote[11][2]) {
-			return emote[11];
-		} else if (rdm >= emote[10][2]) {
-			return emote[10];
-		} else if (rdm >= emote[9][2]) {
-			return emote[9];
-		} else if (rdm >= emote[8][2]) {
-			return emote[8];
-		} else if (rdm >= emote[7][2]) {
-			return emote[7];
-		} else if (rdm >= emote[6][2]) {
-			return emote[6];
-		} else {
-			return emote[Math.floor(Math.random()*6)];
+			API.sendChat(`/me ${row1}|${row2}|${row3} @${msg.un}, you won ${earn}PP ! :tada:`);
 		}
 	}
 	// Hangmann stuff
-	String.prototype.replaceAt=function(index, replacement) {
-		return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
+	String.prototype.replaceAt = function(index, replacement) {
+		return this.substr(0, index) + replacement + this.substr(index + replacement.length);
 	};
 	const words = ['chorus', 'clef', 'maestro', 'piano', 'music', 'symphony', 'rythm', 'requiem', 'serenade', 'sonata', 'soprano', 'vibrato', 'virtuoso', 'table', 'television', 'drawer', 'computer', 'laptop', 'house', 'church', 'fruits', 'vegetable', 'speakers', 'games', 'keyboard', 'coins', 'money', 'happy', 'share', 'disco', 'country', 'paper', 'magnetophone', 'xylophone', 'guitare'];
 	const abc = 'abcdefghijklmnopqrstuvwxyz';
@@ -230,7 +213,7 @@
 			penduActive = true;
 			secret = words[Math.floor(Math.random()*words.length)];
 
-			for (var i=0; i<secret.length; i++) {
+			for (var i = 0; i < secret.length; i++) {
 				underline+='-';
 			}
 
@@ -394,19 +377,47 @@
 		bot.retrieveSettings();
 
 		function playLive() {
-			if (API.getWaitList().length !== 0 && API.getDJ() !== undefined) return;
+			if (API.getDJ() !== undefined || API.getWaitList().length !== 0) return;
+
+			let liveWarn = ' Join the waitlist and I\'ll stop playing!';
+			let _welcome = bot.chat.welcome;
+			let _welcomeback = bot.chat.welcomeback;
 
 			bot.settings.smartSkip = false;
 			bot.settings.historySkip = false;
+			bot.chat.welcome += liveWarn;
+			bot.chat.welcomeback += liveWarn;
 			if (API.djJoin() === 0) {
 				API.once(API.WAIT_LIST_UPDATE, () => {
 					API.once(API.WAIT_LIST_UPDATE, () => {
 						bot.settings.smartSkip = true;
 						bot.settings.historySkip = true;
+						bot.chat.welcome = _welcome;
+						bot.chat.welcomeback = _welcomeback;
 						$.ajax({url:'/_/booth',type:'DELETE'});
 					});
 				});
 			}
+		}
+		function naModSkip(name) {
+			API.sendChat(subChat(bot.chat.notavailable, {
+				name: name
+			}));
+			if (bot.settings.smartSkip) {
+				return bot.roomUtilities.smartSkip();
+			} else {
+				return API.moderateForceSkip();
+			}
+		}
+		function storeToStorage() {
+			localStorage.setItem('basicBotsettings', JSON.stringify(bot.settings));
+			localStorage.setItem('basicBotRoom', JSON.stringify(bot.room));
+			var basicBotStorageInfo = {
+				time: Date.now(),
+				stored: true,
+				version: bot.version
+			};
+			localStorage.setItem('basicBotStorageInfo', JSON.stringify(basicBotStorageInfo));
 		}
 
 		bot.commands.gif18Command = {
@@ -656,7 +667,7 @@
 			}
 		};
 		bot.commands.clearlocalstorageCommand = {
-			command: 'clearLS',
+			command: ['clearLS', 'clearls'],
 			rank: 'manager',
 			type: 'exact',
 			functionality: function (chat, cmd) {
@@ -664,13 +675,11 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
 					var plugSettings = localStorage.getItem('settings');
-					var lotoWinsLS = localStorage.getItem('loto-Wins');
 					var lotoCDLS = localStorage.getItem('loto-CD');
 
 					localStorage.clear();
 
 					if (plugSettings !== null) localStorage.setItem('settings', plugSettings);
-					if (lotoWinsLS !== null) localStorage.setItem('loto-Wins', lotoWinsLS);
 					if (lotoCDLS !== null) localStorage.setItem('loto-CD', lotoCDLS);
 
 					API.sendChat('/me [@'+chat.un+'] localStorage cleared ! Be right back..');
@@ -687,6 +696,53 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
 					API.sendChat('This image will get you started on plug: https://i.imgur.com/ZeRR07N.png');
+				}
+			}
+		};
+		bot.commands.mehCommand = {
+			command: 'meh',
+			rank: 'bouncer',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
+				if (!bot.commands.executable(this.rank, chat)) return void(0);
+				else {
+					$("#meh").click();
+					API.sendChat('http://i.imgur.com/NGpjdvp.gif');
+				}
+			}
+		};
+		bot.commands.event = {
+			command: ['event', 'roomevent'],
+			rank: 'manager',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					bot.room.roomevent = !bot.room.roomevent;
+
+					if (bot.room.roomevent) {
+						bot.settings.afkRemoval = false;
+						bot.settings.blacklistEnabled = false;
+						bot.settings.lockGuard = false;
+						bot.settings.timeGuard = false;
+						bot.settings.cycleGuard = false;
+						bot.settings.voteSkip = false;
+						bot.settings.historySkip = false;
+						bot.settings.thorCommand = false;
+					} else {
+						bot.settings.afkRemoval = settings.afkRemoval;
+						bot.settings.blacklistEnabled = settings.blacklistEnabled;
+						bot.settings.lockGuard = settings.lockGuard;
+						bot.settings.timeGuard = settings.timeGuard;
+						bot.settings.cycleGuard = settings.cycleGuard;
+						bot.settings.voteSkip = settings.voteSkip;
+						bot.settings.historySkip = settings.historySkip;
+						bot.settings.thorCommand = settings.thorCommand;
+					}
+
+					API.sendChat(`/me [@${chat.un}] Event mode ${(bot.room.roomevent ? 'enabled. Things like historySkip or timeGuard have been disabled.' : 'disabled.')}`);
 				}
 			}
 		};
@@ -751,6 +807,7 @@
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
+					if (chat.uid === 4613422) return loto(chat); // testing stuff
 					if (cooldown.loto.length) {
 						for (var i = 0; i < cooldown.loto.length; i++) {
 							if (i+1 >= cooldown.loto.length && chat.uid !== cooldown.loto[i][1]) {
@@ -775,31 +832,6 @@
 						localStorage.setItem('loto-CD', JSON.stringify(cooldown.loto));
 						loto(chat);
 					}
-				}
-			}
-		};
-		bot.commands.woot = {
-			command: 'woot',
-			rank: 'bouncer',
-			type: 'exact',
-			functionality: function (chat, cmd) {
-				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
-				if (!bot.commands.executable(this.rank, chat)) return void (0);
-				else {
-					$("#woot").click();
-				}
-			}
-		};
-		bot.commands.meh = {
-			command: 'meh',
-			rank: 'bouncer',
-			type: 'exact',
-			functionality: function (chat, cmd) {
-				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
-				if (!bot.commands.executable(this.rank, chat)) return void(0);
-				else {
-					$("#meh").click();
-					API.sendChat('http://i.imgur.com/NGpjdvp.gif');
 				}
 			}
 		};
@@ -912,7 +944,7 @@
 			}
 		};
 		bot.commands.pendu = {
-			command: 'pendu',
+			command: ['pendu', 'hangman'],
 			rank: 'user',
 			type: 'exact',
 			functionality: function (chat, cmd) {
@@ -924,7 +956,7 @@
 			}
 		};
 		bot.commands.stopPendu = {
-			command: 'stoppendu',
+			command: ['stoppendu', 'stophangman'],
 			rank: 'bouncer',
 			type: 'exact',
 			functionality: function (chat, cmd) {
@@ -954,80 +986,169 @@
 				}
 			}
 		};
-		API.on(API.ADVANCE, function(e) {
-			// if no media, no need to check
-			if (typeof e.media === 'undefined') return;
+		// Remove basicBot advance handler
+		API._events.advance.shift();
+		// To use our own
+		API.on(API.ADVANCE, function(obj) {
+			// Clear timers
+			if (typeof bot.room.historySkip !== 'undefined') clearTimeout(bot.room.historySkip);
+			if (typeof bot.room.autoskipTimer !== 'undefined') clearTimeout(bot.room.autoskipTimer);
+			// Check if a song is playing and woot
+			if (typeof obj.media === 'undefined') return;
+			if (bot.settings.autowoot) $('#woot').click();
 
-			// I know I know.. It's ugly but ain't nobody got time for dat
-			if (e.media.title.toLowerCase().indexOf('nightcore') != -1 || e.media.author.toLowerCase().indexOf('nightcore') != -1) {
-				API.sendChat(`/me [@${e.dj.username}] nightcore is not allowed. Skipping..`);
-				bot.roomUtilities.smartSkip();
-			} else if (e.media.title.toLowerCase().indexOf('ear rape') != -1 || e.media.author.toLowerCase().indexOf('ear rape') != -1) {
-				API.sendChat(`/me [@${e.dj.username}] Ear rape I see? Pathetic.. @staff`);
-				waitlistBan({ID: e.dj.id, duration: 'f', reason: 3});
-			} else if (e.media.title.toLowerCase().indexOf('gemidão do zap') != -1 || e.media.author.toLowerCase().indexOf('gemidão do zap') != -1) {
-				API.sendChat(`/me [@${e.dj.username}] Ear rape I see? Pathetic.. @staff`);
-				waitlistBan({ID: e.dj.id, duration: 'f', reason: 3});
-			} else if (e.media.format === 2) {
-				SC.get('/tracks/' + e.media.cid).catch((error) => {
-					if (error.status === 404) {
-						API.sendChat(`/me [@${e.dj.username}] this track is unavailable, please update your playlists and chose another song before you play again.`);
-						bot.roomUtilities.smartSkip();
-					}
-				});
-			} else {
-				let limit = bot.settings.maximumSongLength*60;
-				if (bot.settings.smartSkip && e.media.duration > limit) {
-					API.sendChat(`Song is longer than ${Math.floor(limit/60)}min ${limit%60}s, skipping after the limit.`);
-					setTimeout(function(data) {
-						// Is it still the same music or has it been skipped already ?
-						if (data.media.cid === API.getMedia().cid) {
-							API.sendChat('Skipping after the time limit..');
-							API.moderateForceSkip();
-						}
-					}, limit*1000, e);
+			for (var i = 0; i < bot.room.users.length; i++) {
+				if (bot.room.users[i].id === obj.dj.id) {
+					bot.room.users[i].lastDC = {
+						time: null,
+						position: null,
+						songCount: 0
+					};
 				}
 			}
 
-			/*var media = e.media;
-			var history = API.getHistory();
-			var dj = e.dj;
-			var warns = 0;
+			let blacklistRE = /(nightcore|ear rape|gemidão do zap)/gi;
+			var blacklistArray = ['nightcore', 'ear rape', 'gemidão do zap'];
+			let wholeTitle = `${obj.media.author} - ${obj.media.title}`;
 
-			// i = 1 to jump the first item being the current song
-			for (var i = 1; i < history.length; i++) {
-				if (media.format == history[i].media.format && media.cid == history[i].media.cid)
-					warns++;
+			wholeTitle.split(blacklistRE).forEach((word) => {
+				let indexOfBlacklist = blacklistArray.indexOf(word);
+				if (indexOfBlacklist > -1) {
+					switch(indexOfBlacklist) {
+						case 0:
+							API.sendChat(`/me [@${obj.dj.username}] nightcore is not allowed. Skipping..`);
+							bot.roomUtilities.smartSkip();
+						break;
+
+						case 1:
+						case 2:
+							API.sendChat(`/me [@${obj.dj.username}] Good luck playing that again. @staff`);
+							if (obj.dj.role > 0 || obj.dj.gRole > 0)
+								waitlistBan({ID: obj.dj.id, duration: 'd', reason: 3});
+							else
+								waitlistBan({ID: obj.dj.id, duration: 'f', reason: 3});
+						break;
+					}
+
+					return;
+				}
+			});
+
+			var lastplay = obj.lastPlay;
+			if (typeof lastplay === 'undefined') return;
+			if (bot.settings.songstats) {
+				if (typeof bot.chat.songstatistics === 'undefined') {
+					API.sendChat('/me ' + lastplay.media.author + ' - ' + lastplay.media.title + ': ' + lastplay.score.positive + 'W/' + lastplay.score.grabs + 'G/' + lastplay.score.negative + 'M.');
+				} else {
+					API.sendChat(subChat(bot.chat.songstatistics, {
+						artist: lastplay.media.author,
+						title: lastplay.media.title,
+						woots: lastplay.score.positive,
+						grabs: lastplay.score.grabs,
+						mehs: lastplay.score.negative
+					}));
+				}
 			}
+			bot.room.roomstats.totalWoots += lastplay.score.positive;
+			bot.room.roomstats.totalMehs += lastplay.score.negative;
+			bot.room.roomstats.totalCurates += lastplay.score.grabs;
+			bot.room.roomstats.songCount++;
+			bot.roomUtilities.intervalMessage();
+			bot.room.currentDJID = obj.dj.id;
 
-			switch(warns) {
-				case 0: break;
-
-				case 1:
-					API.sendChat(`/me First Warning @${dj.username}, you have two songs in history, if this continue, you will be removed from the waitlist.`);
-				break;
-
-				case 2:
-					API.sendChat(`/me Second Warning @${dj.username}, please check your playlists or you will be removed.`);
-				break;
-
-				case 3:
-					bot.settings.smartSkip = false;
-					API.moderateForceQuit();
-					API.sendChat(`/me @${dj.username} you have been removed from the waitlist for having too many songs in history. If this happens once more, you will be waitlist banned for 15 minutes.`);
-					setTimeout(() => bot.settings.smartSkip = true, 10*1000);
-				break;
-
-				default:
-					bot.settings.smartSkip = false;
-					waitlistBan({
-						ID: dj.id,
-						duration: 's',
-						reason: 4
+			var newMedia = obj.media;
+			var format = obj.media.format;
+			var cid = obj.media.cid;
+			setTimeout(function() {
+				var mid = obj.media.format + ':' + obj.media.cid;
+				for (var bl in bot.room.blacklists) {
+					if (bot.settings.blacklistEnabled) {
+						if (bot.room.blacklists[bl].indexOf(mid) > -1) {
+							API.sendChat(subChat(bot.chat.isblacklisted, {
+								blacklist: bl
+							}));
+							if (bot.settings.smartSkip) {
+								return bot.roomUtilities.smartSkip();
+							} else {
+								return API.moderateForceSkip();
+							}
+						}
+					}
+				}
+			}, 2000);
+			setTimeout(function() {
+				let limit = bot.settings.maximumSongLength*60;
+				if (bot.settings.timeGuard && newMedia.duration > limit && !bot.room.roomevent) {
+					API.sendChat(`Song is longer than ${Math.floor(limit/60)}min ${limit%60}s, skipping after the limit.`);
+					setTimeout(function(data) {
+						// Is it still the same music or has it been skipped already ?
+						if (data.cid === API.getMedia().cid) {
+							API.sendChat('Skipping after the time limit..');
+							API.moderateForceSkip();
+						}
+					}, limit*1000, newMedia);
+				}
+			}, 2000);
+			setTimeout(function() {
+				if (format == 1) {
+					$.getJSON('https://www.googleapis.com/youtube/v3/videos?id=' + cid + '&key=AIzaSyDcfWu9cGaDnTjPKhg_dy9mUh6H7i4ePZ0&part=snippet&callback=?', function(track) {
+						if (typeof(track.items[0]) === 'undefined') {
+							var name = obj.dj.username;
+							API.sendChat(subChat(bot.chat.notavailable, {
+								name: name
+							}));
+							if (bot.settings.smartSkip) {
+								return bot.roomUtilities.smartSkip();
+							} else {
+								return API.moderateForceSkip();
+							}
+						}
 					});
-					setTimeout(() => bot.settings.smartSkip = true, 10*1000);
-				break;
-			}*/
+				} else {
+					SC.get('/tracks/' + cid, function(track) {
+						if (typeof track.title === 'undefined') naModSkip(obj.dj.username);
+					}).catch((error) => {
+						if (error.status === 404) naModSkip(obj.dj.username);
+					});
+				}
+			}, 2000);
+
+			if (bot.settings.historySkip) {
+				var alreadyPlayed = false;
+				var apihistory = API.getHistory();
+				var name = obj.dj.username;
+				bot.room.historySkip = setTimeout(function() {
+					for (var i = 0; i < apihistory.length; i++) {
+						if (apihistory[i].media.cid === obj.media.cid) {
+							bot.room.historyList[i].push(+new Date());
+							alreadyPlayed = true;
+							API.sendChat(subChat(bot.chat.songknown, {
+								name: name
+							}));
+							if (bot.settings.smartSkip) {
+								return bot.roomUtilities.smartSkip();
+							} else {
+								return API.moderateForceSkip();
+							}
+						}
+					}
+					if (!alreadyPlayed) {
+						bot.room.historyList.push([obj.media.cid, +new Date()]);
+					}
+				}, 2000);
+			}
+			if (bot.settings.autoskip) {
+				var remaining = obj.media.duration * 1000;
+				var startcid = API.getMedia().cid;
+				bot.room.autoskipTimer = setTimeout(function() {
+					var endcid = API.getMedia().cid;
+					if (startcid === endcid) {
+						//API.sendChat('Song stuck, skipping...');
+						API.moderateForceSkip();
+					}
+				}, remaining + 5000);
+			}
+			storeToStorage();
 		});
 		API.on(API.CHAT, function(msg) {
 			// Auto-delete socket app promotion
@@ -1114,12 +1235,11 @@
 		API.on(API.USER_JOIN, () => toggleCycle());
 		API.on(API.USER_LEAVE, () => toggleCycle());
 		API.on(API.WAIT_LIST_UPDATE, () => {
-			toggleCycle();
 			if (typeof window.wluInt !== 'undefined') clearTimeout(window.wluInt);
-			if (API.getWaitList().length !== 0 && API.getDJ() !== undefined) return;
+			if (API.getDJ() !== undefined || API.getWaitList().length !== 0) return;
 
 			window.wluInt = setTimeout(() => {
-				if (API.getWaitList().length !== 0 && API.getDJ() !== undefined) return;
+				if (API.getDJ() !== undefined || API.getWaitList().length !== 0) return;
 
 				getCurrentLive((media) => {
 					isUnavailable(media, (unavailable, media) => {
@@ -1169,13 +1289,13 @@
 		voteSkip: true,
 		voteSkipLimit: 5,
 		historySkip: true,
-		timeGuard: false,
+		timeGuard: true,
 		maximumSongLength: 7.5,
 		autodisable: false,
 		commandCooldown: 5,
 		usercommandsEnabled: true,
 		thorCommand: true,
-    thorCooldown: 15,
+		thorCooldown: 15,
 		skipPosition: 2,
 		skipReasons: [
 			["history",     "This song is in the history."],
@@ -1183,7 +1303,8 @@
 			["unavailable", "The song you played was not available for some users."],
 			["indispo",     "The song you played was not available for some users. "],
 			["troll",       "We do not allow this type of music/video."],
-			["nsfw",        "The song you played contained not safe for work content."]
+			["nsfw",        "The song you played contained not safe for work content."],
+			["outro",       "The song you played had a long/irrelevant outro."]
 		],
 		motdEnabled: false,
 		motdInterval: 5,
@@ -1219,9 +1340,9 @@
 			BANNED: "https://rawgit.com/WiBla/custom/master/blacklists/BANNEDlist.json"
 		}
 	};
-	settings.skipReasons.push(["theme", "This song does not fit the room theme: "+settings.themeLink]);
-	settings.intervalMessages.push("Join us on discord ! "+settings.discordLink);
-	localStorage.setItem("basicBotsettings", JSON.stringify(settings));
+	settings.skipReasons.push(['theme', 'This song does not fit the room theme: '+settings.themeLink]);
+	settings.intervalMessages.push('Join us on discord ! '+settings.discordLink);
+	localStorage.setItem('basicBotsettings', JSON.stringify(settings));
 
 	$.getScript("https://rawgit.com/bscBot/source/master/basicBot.js", extend);
 }).call(this);
