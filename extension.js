@@ -134,7 +134,16 @@
 		gif: 0,
 		loto: JSON.parse(localStorage.getItem('loto-CD')) || []
 	};
-	const lotoBlacklist = [4613422, 6553384];
+	const lotoBlacklist = [
+		4613422,  // WiBla
+		6553384,  // <~ Tene ~>
+		31441561, // Vitus34
+		31254834, // oli-roux,
+		30611116, // sam_1
+		31255878, // YulanDubé46
+		31465051, // Y0l0hentai69
+		31442496  // Montcalmxv5
+	];
 	const emote = [
 		// [Emote, value, %chance]
 		['💀',        0, 90],    // skull
@@ -892,6 +901,18 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
 					API.sendChat(`I have ${API.getUser().pp.spaceOut()}PP, ${API.getUser().xp.spaceOut()}XP, I am level ${API.getUser().level} [${$('.info .bar .value')[0].innerText} XP]`);
+				}
+			}
+		};
+		bot.commands.favorite = {
+			command: ['favorite', 'fav'],
+			rank: 'user',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					API.sendChat('https://i.imgur.com/ji5Uzkg.gif Remember to put the room in your favorite if we deserve it ! ♥');
 				}
 			}
 		};
