@@ -3,24 +3,24 @@
 	const giphyKey = 'dc6zaTOxFJmzC';
 	const roomRE = /(plug\.dj\/)(?!enjoy-the-drop\b|about\b|ba\b|forgot-password\b|founders\b|giftsub\/\d|jobs\b|legal\b|merch\b|partners\b|plot\b|privacy\b|purchase\b|subscribe\b|team\b|terms\b|press\b|_\/|@\/|!\/)(.+)/i;
 	const tuneStrings = [
-		"%%DJ%%, %%USER%% would like you to know that this is a great tune !",
-		"%%DJ%%, %%USER%% thinks this is an awesome track !",
-		"%%DJ%%, keep playing such great tracks because %%USER%% seems to like them !",
-		"%%USER%% absolutely love this music %%DJ%% !",
-		'%%DJ%%, %%USER%% is really enjoying this track !',
-		'%%DJ%%, %%USER%% is dancing his feet of this track !',
-		'"%%DJ%% DUDE, this is awesome !" -from %%USER%%'
+		"%%DJ%%, %%USER%% would like you to know that this is a great tune!",
+		"%%DJ%%, %%USER%% thinks this is an awesome track!",
+		"%%DJ%%, keep playing such great tracks because %%USER%% seems to like them!",
+		"%%USER%% absolutely love this music %%DJ%%!",
+		'%%DJ%%, %%USER%% is really enjoying this track!',
+		'%%DJ%%, %%USER%% is dancing his feet of this track!',
+		'"%%DJ%% DUDE, this is awesome!" -from %%USER%%'
 	];
 	const propsStrings = [
-		"%%DJ%% Aye mate, %%USER%% says props to you for your play!",
-		"[%%USER%%] %%DJ%% Damn, you're on :fire:!",
-		"%%DJ%%, %%USER%% thinks you're a great DJ!",
-		"%%DJ%%, if %%USER%% could buy you flowers 💐, they would! (That means you're a good DJ!)",
+		"%%DJ%% Aye mate, %%USER%% is on board with your ",
+		"[%%USER%%] %%DJ%% Damn, you're on 🔥!",
+		"%%DJ%%, %%USER%% wants you to know that you're a great DJ!",
+		"%%DJ%%, %%USER%% has bought you some 💐 for your awesome play!",
 		"Hey %%DJ%%, I think %%USER%% really likes you 😘"
 	];
-	const modules = {
+	/*const modules = {
 		roomInfo: _.find(require.s.contexts._.defined,m=>m&&m.attributes&&m.attributes.shouldCycle)
-	};
+	};*/
 	function subChat(chat, obj) {
 		if (typeof chat === 'undefined') return chat;
 		var lit = '%%';
@@ -54,14 +54,14 @@
 			}
 		);
 	}
-	function toggleCycle() {
+	/*function toggleCycle() {
 		let shouldCycle = modules.roomInfo.attributes.shouldCycle;
-		let disableCycle = shouldCycle && API.getUsers().length >= 12;
+		let disableCycle = shouldCycle && API.getUsers().length >= 10;
 		let enableCycle = !shouldCycle && API.getUsers().length <= 8;
 
 		if (disableCycle) API.moderateDJCycle(false);
 		else if (enableCycle) API.moderateDJCycle(true);
-	}
+	}*/
 	function waitlistBan(options, callback) {
 		if (typeof options.reason === 'undefined') options.reason = 1;
 
@@ -140,9 +140,9 @@
 		31441561, // Vitus34
 		31254834, // oli-roux,
 		30611116, // sam_1
-		31255878, // YulanDubé46
 		31465051, // Y0l0hentai69
-		31442496  // Montcalmxv5
+		31442496, // Montcalmxv5
+		31256054  // miguou888
 	];
 	const emote = [
 		// [Emote, value, %chance]
@@ -209,7 +209,48 @@
 	String.prototype.replaceAt = function(index, replacement) {
 		return this.substr(0, index) + replacement + this.substr(index + replacement.length);
 	};
-	const words = ['chorus', 'clef', 'maestro', 'piano', 'music', 'symphony', 'rythm', 'requiem', 'serenade', 'sonata', 'soprano', 'vibrato', 'virtuoso', 'table', 'television', 'drawer', 'computer', 'laptop', 'house', 'church', 'fruits', 'vegetable', 'speakers', 'games', 'keyboard', 'coins', 'money', 'happy', 'share', 'disco', 'country', 'paper', 'magnetophone', 'xylophone', 'guitare'];
+	const words = [
+		'chorus',
+		'maestro',
+		'piano',
+		'music',
+		'symphony',
+		'rythm',
+		'requiem',
+		'serenade',
+		'sonata',
+		'soprano',
+		'vibrato',
+		'virtuoso',
+		'magnetophone',
+		'microphone',
+		'xylophone',
+		'guitare',
+		'table',
+		'television',
+		'drawer',
+		'computer',
+		'laptop',
+		'house',
+		'church',
+		'fruits',
+		'kiwi',
+		'vegetable',
+		'speakers',
+		'games',
+		'video-games',
+		'keyboard',
+		'coins',
+		'money',
+		'happy',
+		'sharing',
+		'disco',
+		'country',
+		'paper',
+		'mysterious',
+		'sphinx',
+		'egypt'
+	];
 	const abc = 'abcdefghijklmnopqrstuvwxyz';
 	var penduActive = false;
 	var secret = '';
@@ -223,7 +264,7 @@
 			secret = words[Math.floor(Math.random()*words.length)];
 
 			for (var i = 0; i < secret.length; i++) {
-				underline+='-';
+				underline += secret.charAt(i) === '-' ? '-' : '_';
 			}
 
 			API.sendChat(`A new hangman has started! ${underline} ${guess} guesses left!`);
@@ -427,6 +468,11 @@
 				version: bot.version
 			};
 			localStorage.setItem('basicBotStorageInfo', JSON.stringify(basicBotStorageInfo));
+		}
+		function skip() {
+			if (API.getWaitList().length === 0) API.moderateForceQuit();
+			else if (bot.settings.smartSkip) bot.roomUtilities.smartSkip();
+			else API.moderateForceSkip();
 		}
 
 		bot.commands.gif18Command = {
@@ -1137,23 +1183,44 @@
 			if (bot.settings.historySkip) {
 				var alreadyPlayed = false;
 				var apihistory = API.getHistory();
-				var name = obj.dj.username;
+				var dj = obj.dj;
+				var warns = 0;
+
 				bot.room.historySkip = setTimeout(function() {
 					for (var i = 0; i < apihistory.length; i++) {
 						if (apihistory[i].media.cid === obj.media.cid) {
-							bot.room.historyList[i].push(+new Date());
 							alreadyPlayed = true;
-							API.sendChat(subChat(bot.chat.songknown, {
-								name: name
-							}));
-							if (bot.settings.smartSkip) {
-								return bot.roomUtilities.smartSkip();
-							} else {
-								return API.moderateForceSkip();
-							}
+							warns++;
+
+							if (bot.room.historyList[i])
+								bot.room.historyList[i].push(+new Date());
 						}
 					}
-					if (!alreadyPlayed) {
+
+					if (alreadyPlayed) {
+						if (warns === 0) {
+							API.sendChat(subChat(bot.chat.songknown, {
+								name: dj.username
+							}));
+							skip();
+						} else if (warns === 1) {
+							API.sendChat(`/me First Warning @${dj.username}, you have two songs in history, if this continue, you will be removed from the waitlist.`);
+							skip();
+						} else if (warns === 2) {
+							API.sendChat(`/me Second Warning @${dj.username}, please check your playlists or you will be removed.`);
+							skip();
+						} else if (warns === 3) {
+							API.moderateForceQuit();
+							API.sendChat(`/me @${dj.username} you have been removed from the waitlist for having too many songs in history. If this happens once more, you will be waitlist banned for 15 minutes.`);
+						} else if (warns >= 4) {
+							waitlistBan({
+								ID: dj.id,
+								duration: 's',
+								reason: 4
+							});
+							API.sendChat(`/me @${dj.username} you have been waitlist banned for 15 minutes, please disable any auto-join and check your playlists regularly to prevent this from happening again.`);
+						}
+					} else {
 						bot.room.historyList.push([obj.media.cid, +new Date()]);
 					}
 				}, 2000);
@@ -1172,6 +1239,8 @@
 			storeToStorage();
 		});
 		API.on(API.CHAT, function(msg) {
+			// trying to be low on ram
+			API.sendChat('/clear');
 			// Auto-delete socket app promotion
 			if (
 				msg.message.indexOf('http://socket.dj') !== -1 &&
@@ -1198,7 +1267,7 @@
 						}
 					}
 
-					if (underline.indexOf('-') !== -1)
+					if (underline.indexOf('_') !== -1)
 						API.sendChat(`${underline} ${guess} guesses left!  ${guessed.join(',')}`);
 					else {
 						API.sendChat(`/me @${msg.un} You found the secret word "${secret}"! :clap:`);
@@ -1253,8 +1322,8 @@
 				API.moderateForceSkip();
 			}
 		});
-		API.on(API.USER_JOIN, () => toggleCycle());
-		API.on(API.USER_LEAVE, () => toggleCycle());
+		// API.on(API.USER_JOIN, () => toggleCycle());
+		// API.on(API.USER_LEAVE, () => toggleCycle());
 		API.on(API.WAIT_LIST_UPDATE, () => {
 			if (typeof window.wluInt !== 'undefined') clearTimeout(window.wluInt);
 			if (API.getDJ() !== undefined || API.getWaitList().length !== 0) return;
@@ -1336,20 +1405,18 @@
 		opLink: "http://wibla.free.fr/plug/room#op",
 		rulesLink: "http://wibla.free.fr/plug/rules",
 		themeLink: "https://i.imgur.com/2riDvuR.png",
-		fbLink: null,
+		fbLink: "https://facebook.com/ElectroHousenjoythedrop",
 		youtubeLink: null,
 		discordLink: "https://discord.gg/9GPAeYF",
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
-			"Give the !loto a try, you can win up to 225K PP !! :gift:",
-			"If you have any feedback, feel free to hit us on Discord or in the chat !",
+			"Give the !loto a try, you can win up to 75k PP daily!! :gift:",
 			"Our favorite autowoot https://github.com/Plug-It",
-			"https://i.imgur.com/ji5Uzkg.gif Remember to put the room in your favorite if we deserve it ! ♥",
-			":warning: If your songs has more than 5 mehs, it will be skipped !",
-			"The DJ rotation is automaticly enabled if there are less than 10 users :)",
-			"Invite your friends ! The more people, the more fun !",
-			"You can play music up to 7min 30sec. After that, it will be skipped !",
-			"Try the !pendu if you're in a gaming mood !",
+			"https://i.imgur.com/ji5Uzkg.gif Remember to put the room in your favorite if we deserve it! ♥",
+			":warning: If your songs has more than 5 mehs, it will be skipped!",
+			"Invite your friends! The more people, the more fun!",
+			"You can play music up to 7min 30sec. After that, it will be skipped!",
+			"Feel free to use !tune or !props whenever you hear a banging tune!",
 			"Try to shuffle your playlists as much as possible, here's a great script for it: https://plugmixer.sunwj.com/"
 		],
 		messageInterval: 10,
