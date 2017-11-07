@@ -138,11 +138,12 @@
 		4613422,  // WiBla
 		6553384,  // <~ Tene ~>
 		31441561, // Vitus34
-		31254834, // oli-roux,
+		31254834, // oli-roux
 		30611116, // sam_1
 		31465051, // Y0l0hentai69
 		31442496, // Montcalmxv5
-		31256054  // miguou888
+		31256054, // miguou888
+		31816723  // Bot-roux
 	];
 	const emote = [
 		// [Emote, value, %chance]
@@ -161,7 +162,7 @@
 	];
 	function generateEmote(msg) {
 		let chanceMultiplier;
-		if (lotoBlacklist.indexOf(msg.uid) > -1) chanceMultiplier = 0;
+		if (lotoBlacklist.indexOf(msg.uid) > -1) chanceMultiplier = 96.999;
 		else chanceMultiplier = 100;
 
 		let rdm = Math.random()*chanceMultiplier; // 0 - 99.999999999999999
