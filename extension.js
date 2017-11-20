@@ -137,13 +137,7 @@
 	const lotoBlacklist = [
 		4613422,  // WiBla
 		6553384,  // <~ Tene ~>
-		31441561, // Vitus34
-		31254834, // oli-roux
-		30611116, // sam_1
-		31465051, // Y0l0hentai69
-		31442496, // Montcalmxv5
 		31256054, // miguou888
-		31816723  // Bot-roux
 	];
 	const emote = [
 		// [Emote, value, %chance]
@@ -864,6 +858,16 @@
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
 					if (chat.uid === 4613422) return loto(chat); // testing stuff
+
+					// Check if grey users have been in the room for at least 15mins before trying the loto
+					if (!API.hasPermission(3856347, API.ROLE.DJ) ||
+					    (Date.now() - bot.room.roomstats.launchTime) <= 1000 * 60 * 15)) {
+						let userJoinTime = bot.room.users.filter(user => user.id === chat.uid)[0].jointime;
+						let minutesInRoom = (Date.now() - userJoinTime) / 1000 / 60;
+
+						if (minutesInRoom < 15) return API.sendChat(`/me [@${chat.un}] you need to be in the room for at least 15 minutes before attempting the loto!`);
+					}
+
 					if (cooldown.loto.length) {
 						for (var i = 0; i < cooldown.loto.length; i++) {
 							if (i+1 >= cooldown.loto.length && chat.uid !== cooldown.loto[i][1]) {
@@ -941,7 +945,7 @@
 		};
 		bot.commands.info = {
 			command: 'info',
-			rank: 'user',
+			rank: 'bouncer',
 			type: 'exact',
 			functionality: function (chat, cmd) {
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
