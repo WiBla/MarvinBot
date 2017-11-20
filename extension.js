@@ -860,8 +860,8 @@
 					if (chat.uid === 4613422) return loto(chat); // testing stuff
 
 					// Check if grey users have been in the room for at least 15mins before trying the loto
-					if (!API.hasPermission(3856347, API.ROLE.DJ) ||
-					    (Date.now() - bot.room.roomstats.launchTime) <= 1000 * 60 * 15)) {
+					if (!API.hasPermission(chat.uid, API.ROLE.DJ) ||
+					    (Date.now() - bot.room.roomstats.launchTime) <= 1000 * 60 * 15) {
 						let userJoinTime = bot.room.users.filter(user => user.id === chat.uid)[0].jointime;
 						let minutesInRoom = (Date.now() - userJoinTime) / 1000 / 60;
 
