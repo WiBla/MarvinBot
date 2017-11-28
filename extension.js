@@ -861,11 +861,11 @@
 
 					// Check if grey users have been in the room for at least 15mins before trying the loto
 					if (!API.hasPermission(chat.uid, API.ROLE.DJ) ||
-					    (Date.now() - bot.room.roomstats.launchTime) <= 1000 * 60 * 15) {
+					    (Date.now() - bot.room.roomstats.launchTime) <= 1000 * 60 * 30) {
 						let userJoinTime = bot.room.users.filter(user => user.id === chat.uid)[0].jointime;
 						let minutesInRoom = (Date.now() - userJoinTime) / 1000 / 60;
 
-						if (minutesInRoom < 15) return API.sendChat(`/me [@${chat.un}] you need to be in the room for at least 15 minutes before attempting the loto!`);
+						if (minutesInRoom < 30) return API.sendChat(`/me [@${chat.un}] you need to be in the room for at least 30 minutes before attempting the loto!`);
 					}
 
 					if (cooldown.loto.length) {
@@ -1209,10 +1209,10 @@
 							}));
 							skip();
 						} else if (warns === 1) {
-							API.sendChat(`/me First Warning @${dj.username}, you have two songs in history, if this continue, you will be removed from the waitlist.`);
+							API.sendChat(`/me @${dj.username}, this song is in the DJ history.`);
 							skip();
 						} else if (warns === 2) {
-							API.sendChat(`/me Second Warning @${dj.username}, please check your playlists or you will be removed.`);
+							API.sendChat(`/me @${dj.username}, this song is in the DJ history (x2). Please check your playlists or you will be removed.`);
 							skip();
 						} else if (warns === 3) {
 							API.moderateForceQuit();
