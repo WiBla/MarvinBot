@@ -12,7 +12,7 @@
 		'"%%DJ%% DUDE, this is awesome!" -from %%USER%%'
 	];
 	const propsStrings = [
-		"%%DJ%% Aye mate, %%USER%% is on board with your ",
+		"%%DJ%% Aye mate, %%USER%% wants to set sails with you 👍",
 		"[%%USER%%] %%DJ%% Damn, you're on 🔥!",
 		"%%DJ%%, %%USER%% wants you to know that you're a great DJ!",
 		"%%DJ%%, %%USER%% has bought you some 💐 for your awesome play!",
@@ -775,6 +775,7 @@
 					if (bot.room.roomevent) {
 						bot.settings.afkRemoval = false;
 						bot.settings.blacklistEnabled = false;
+						bot.settings.filterSongs = false;
 						bot.settings.lockGuard = false;
 						bot.settings.timeGuard = false;
 						bot.settings.cycleGuard = false;
@@ -784,6 +785,7 @@
 					} else {
 						bot.settings.afkRemoval = settings.afkRemoval;
 						bot.settings.blacklistEnabled = settings.blacklistEnabled;
+						bot.settings.filterSongs = settings.filterSongs;
 						bot.settings.lockGuard = settings.lockGuard;
 						bot.settings.timeGuard = settings.timeGuard;
 						bot.settings.cycleGuard = settings.cycleGuard;
@@ -793,6 +795,20 @@
 					}
 
 					API.sendChat(`/me [@${chat.un}] Event mode ${(bot.room.roomevent ? 'enabled. Things like historySkip or timeGuard have been disabled.' : 'disabled.')}`);
+				}
+			}
+		};
+		bot.commands.toggleSongFilter = {
+			command: ['songFilter', 'toggleSongFilter'],
+			rank: 'manager',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					bot.settings.filterSongs = !bot.settings.filterSongs;
+
+					API.sendChat(`/me [@${chat.un}] Song filtering ${(bot.settings.filterSongs ? 'enabled' : 'disabled')}.`);
 				}
 			}
 		};
@@ -1079,32 +1095,34 @@
 				}
 			}
 
-			let blacklistRE = /(nightcore|ear rape|gemidão do zap)/gi;
-			var blacklistArray = ['nightcore', 'ear rape', 'gemidão do zap'];
-			let wholeTitle = `${obj.media.author} - ${obj.media.title}`;
+			if (bot.settings.filterSongs) {
+				let blacklistRE = /(nightcore|ear rape|gemidão do zap)/gi;
+				var blacklistArray = ['nightcore', 'ear rape', 'gemidão do zap'];
+				let wholeTitle = `${obj.media.author} - ${obj.media.title}`.toLowerCase();
 
-			wholeTitle.split(blacklistRE).forEach((word) => {
-				let indexOfBlacklist = blacklistArray.indexOf(word);
-				if (indexOfBlacklist > -1) {
-					switch(indexOfBlacklist) {
-						case 0:
-							API.sendChat(`/me [@${obj.dj.username}] nightcore is not allowed. Skipping..`);
-							bot.roomUtilities.smartSkip();
-						break;
+				wholeTitle.split(blacklistRE).forEach((word) => {
+					let indexOfBlacklist = blacklistArray.indexOf(word);
+					if (indexOfBlacklist > -1) {
+						switch(indexOfBlacklist) {
+							case 0:
+								API.sendChat(`/me [@${obj.dj.username}] nightcore isn't allowed in this room (check !theme).`);
+								bot.roomUtilities.smartSkip();
+							break;
 
-						case 1:
-						case 2:
-							API.sendChat(`/me [@${obj.dj.username}] Good luck playing that again. @staff`);
-							if (obj.dj.role > 0 || obj.dj.gRole > 0)
-								waitlistBan({ID: obj.dj.id, duration: 'd', reason: 3});
-							else
-								waitlistBan({ID: obj.dj.id, duration: 'f', reason: 3});
-						break;
+							case 1:
+							case 2:
+								API.sendChat(`/me [@${obj.dj.username}] Good luck playing that again. @staff`);
+								if (obj.dj.role > 0 || obj.dj.gRole > 0)
+									waitlistBan({ID: obj.dj.id, duration: 'd', reason: 3});
+								else
+									waitlistBan({ID: obj.dj.id, duration: 'f', reason: 3});
+							break;
+						}
+
+						return;
 					}
-
-					return;
-				}
-			});
+				});
+			}
 
 			var lastplay = obj.lastPlay;
 			if (typeof lastplay === 'undefined') return;
@@ -1245,7 +1263,8 @@
 		});
 		API.on(API.CHAT, function(msg) {
 			// trying to be low on ram
-			API.sendChat('/clear');
+			if (API.getUser().id === 5285179) API.sendChat('/clear');
+
 			// Auto-delete socket app promotion
 			if (
 				msg.message.indexOf('http://socket.dj') !== -1 &&
@@ -1405,6 +1424,7 @@
 		motdInterval: 5,
 		motd: "",
 		filterChat: false,
+		filterSongs: true,
 		etaRestriction: false,
 		welcome: true,
 		opLink: "http://wibla.free.fr/plug/room#op",
