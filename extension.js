@@ -138,6 +138,7 @@
 		4613422,  // WiBla
 		6553384,  // <~ Tene ~>
 		31256054, // miguou888
+		30051880, // Fana
 	];
 	const emote = [
 		// [Emote, value, %chance]
@@ -146,10 +147,10 @@
 		['💣',        0, 90],    // bomb
 		['👾',        0, 90],    // space_invader
 		['📦',        0, 90],    // package
-		[':troll:',  0, 90],    // 90% chance to lose
+		[':troll:',   0, 90],    // 90% chance to lose
 		['🍒',      500, 90],    // 10%
 		['🍇',     1000, 96],    // 4%
-		['⚡',     2000, 99.4],  // 0.6%
+		['⚡',      2000, 99.4],  // 0.6%
 		['🎲',     5000, 99.8],  // 0.2%
 		['👑',    10000, 99.9],  // 0.1%
 		['🎁',    25000, 99.999] // 0.001%
@@ -422,7 +423,7 @@
 		bot.retrieveSettings();
 
 		function playLive() {
-			if (API.getDJ() !== undefined || API.getWaitList().length !== 0) return;
+			if (API.getDJ() !== undefined || API.getWaitList().length !== 0 || !bot.settings.playLive) return;
 
 			let liveWarn = ' Join the waitlist and I\'ll stop playing!';
 			let _welcome = bot.chat.welcome;
@@ -808,7 +809,21 @@
 				else {
 					bot.settings.filterSongs = !bot.settings.filterSongs;
 
-					API.sendChat(`/me [@${chat.un}] Song filtering ${(bot.settings.filterSongs ? 'enabled' : 'disabled')}.`);
+					API.sendChat(`/me [@${chat.un}] Song filtering ${(bot.settings.filterSongs ? 'enabled' : 'disabled')}!`);
+				}
+			}
+		};
+		bot.commands.toggleLivePlay = {
+			command: ['live', 'toggleLive'],
+			rank: 'manager',
+			type: 'exact',
+			functionality: function (chat, cmd) {
+				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
+				if (!bot.commands.executable(this.rank, chat)) return void (0);
+				else {
+					bot.settings.playLive = !bot.settings.playLive;
+
+					API.sendChat(`/me [@${chat.un}] Live play ${(bot.settings.playLive ? 'enabled' : 'disabled')}!`);
 				}
 			}
 		};
@@ -1380,6 +1395,7 @@
 		language: "english",
 		chatLink: "https://rawgit.com/WiBla/custom/master/lang/en.json",
 		scriptLink: "https://rawgit.com/bscBot/source/master/basicBot.js",
+		playLive: true,
 		roomLock: false,
 		startupCap: 1,
 		startupVolume: 0,
@@ -1432,7 +1448,7 @@
 		themeLink: "https://i.imgur.com/2riDvuR.png",
 		fbLink: "https://facebook.com/ElectroHousenjoythedrop",
 		youtubeLink: null,
-		discordLink: "https://discord.gg/9GPAeYF",
+		discordLink: "https://discord.gg/fVFjmXM",
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
 			"Give the !loto a try, you can win up to 75k PP daily!! :gift:",
