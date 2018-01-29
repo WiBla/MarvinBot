@@ -290,7 +290,7 @@
 
 				let medias = data.data;
 				medias.forEach((media) => {
-					if (media.duration === 86400) callback(media);
+					if ([media.author, media.title].indexOf('24/7 Monstercat Radio') > -1) callback(media);
 				});
 			},
 			error: function() {
