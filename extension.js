@@ -8,7 +8,7 @@
 		"%%DJ%%, keep playing such great tracks because %%USER%% seems to like them!",
 		"%%USER%% absolutely love this music %%DJ%%!",
 		'%%DJ%%, %%USER%% is really enjoying this track!',
-		'%%DJ%%, %%USER%% is dancing his feet of this track!',
+		'%%DJ%%, %%USER%% is dancing his feet off to this track!',
 		'"%%DJ%% DUDE, this is awesome!" -from %%USER%%'
 	];
 	const propsStrings = [
@@ -16,7 +16,8 @@
 		"[%%USER%%] %%DJ%% Damn, you're on 🔥!",
 		"%%DJ%%, %%USER%% wants you to know that you're a great DJ!",
 		"%%DJ%%, %%USER%% has bought you some 💐 for your awesome play!",
-		"Hey %%DJ%%, I think %%USER%% really likes you 😘"
+		"Hey %%DJ%%, I think %%USER%% really likes you 😘",
+		"Hey %%DJ%%, you really set the dancefloor on fire!"
 	];
 	/*const modules = {
 		roomInfo: _.find(require.s.contexts._.defined,m=>m&&m.attributes&&m.attributes.shouldCycle)
@@ -428,16 +429,22 @@
 			let liveWarn = ' Join the waitlist and I\'ll stop playing!';
 			let _welcome = bot.chat.welcome;
 			let _welcomeback = bot.chat.welcomeback;
+			let _ss = bot.settings.smartSkip;
+			let _hs = bot.settings.smartSkip;
+			let _tg = bot.settings.smartSkip;
 
 			bot.settings.smartSkip = false;
 			bot.settings.historySkip = false;
+			bot.settings.timeGuard = false;
 			bot.chat.welcome += liveWarn;
 			bot.chat.welcomeback += liveWarn;
 			if (API.djJoin() === 0) {
+				// only listen to updates once the bot has joined the booth
 				API.once(API.WAIT_LIST_UPDATE, () => {
 					API.once(API.WAIT_LIST_UPDATE, () => {
-						bot.settings.smartSkip = true;
-						bot.settings.historySkip = true;
+						bot.settings.smartSkip = _ss;
+						bot.settings.historySkip = _hs;
+						bot.settings.timeGuard = _tg;
 						bot.chat.welcome = _welcome;
 						bot.chat.welcomeback = _welcomeback;
 						$.ajax({url:'/_/booth',type:'DELETE'});
