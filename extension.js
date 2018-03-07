@@ -7,9 +7,10 @@
 		"%%DJ%%, %%USER%% thinks this is an awesome track!",
 		"%%DJ%%, keep playing such great tracks because %%USER%% seems to like them!",
 		"%%USER%% absolutely love this music %%DJ%%!",
-		'%%DJ%%, %%USER%% is really enjoying this track!',
-		'%%DJ%%, %%USER%% is dancing his feet off to this track!',
-		'"%%DJ%% DUDE, this is awesome!" -from %%USER%%'
+		"%%DJ%%, %%USER%% is really enjoying this track!",
+		"%%DJ%%, %%USER%% is dancing his feet off to this track!",
+		'%%DJ%% DUDE, this is awesome!" -from %%USER%%',
+		"%%DJ%% That's a banger! -%%USER%%"
 	];
 	const propsStrings = [
 		"%%DJ%% Aye mate, %%USER%% wants to set sails with you 👍",
@@ -149,12 +150,12 @@
 		['👾',        0, 90],    // space_invader
 		['📦',        0, 90],    // package
 		[':troll:',   0, 90],    // 90% chance to lose
-		['🍒',      500, 90],    // 10%
-		['🍇',     1000, 96],    // 4%
-		['⚡',      2000, 99.4],  // 0.6%
-		['🎲',     5000, 99.8],  // 0.2%
-		['👑',    10000, 99.9],  // 0.1%
-		['🎁',    25000, 99.999] // 0.001%
+		['🍒',     1000, 90],    // 10%
+		['🍇',     2500, 96],    // 4%
+		['⚡',      5000, 99.4],  // 0.6%
+		['🎲',    25000, 99.8],  // 0.2%
+		['👑',    50000, 99.9],  // 0.1%
+		['🎁',   100000, 99.999] // 0.001%
 	];
 	function generateEmote(msg) {
 		let chanceMultiplier;
@@ -199,7 +200,7 @@
 		else {
 			if (earn >= 1000) earn = (earn /= 1000) + 'k';
 
-			API.sendChat(`/me ${row1}|${row2}|${row3} @${msg.un}, you won ${earn}PP ! :tada:`);
+			API.sendChat(`/me ${row1}|${row2}|${row3} @${msg.un}, you won ${earn}PP ! 🎉`);
 		}
 	}
 	// Hangmann stuff
@@ -943,7 +944,7 @@
 				else {
 					var users = {
 						dj: '@'+API.getDJ().username,
-						user: '@'+chat.un
+						user: chat.un
 					};
 					var string = tuneStrings[Math.floor(Math.random()*tuneStrings.length)];
 
@@ -967,7 +968,7 @@
 				else {
 					var users = {
 						dj: '@'+API.getDJ().username,
-						user: '@'+chat.un
+						user: chat.un
 					};
 					var string = propsStrings[Math.floor(Math.random()*propsStrings.length)];
 
@@ -1037,7 +1038,7 @@
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
-					API.sendChat('https://yennyan.me/tsy/xppp.png');
+					API.sendChat('https://i.imgur.com/PKc98D2.png');
 				}
 			}
 		};
@@ -1401,7 +1402,7 @@
 		botName: "MarvinBot",
 		language: "english",
 		chatLink: "https://rawgit.com/WiBla/custom/master/lang/en.json",
-		scriptLink: "https://rawgit.com/bscBot/source/master/basicBot.js",
+		scriptLink: "https://rawgit.com/WiBla/MarvinBot/master/extension.js",
 		playLive: true,
 		roomLock: false,
 		startupCap: 1,
@@ -1435,9 +1436,8 @@
 		thorCooldown: 15,
 		skipPosition: 2,
 		skipReasons: [
-			["history",     "This song is in the history."],
+			["history",     "This song is in the DJ history."],
 			["sound",       "The song you played had bad sound quality or no sound."],
-			["unavailable", "The song you played was not available for some users."],
 			["indispo",     "The song you played was not available for some users. "],
 			["troll",       "We do not allow this type of music/video."],
 			["nsfw",        "The song you played contained not safe for work content."],
