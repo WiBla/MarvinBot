@@ -10,7 +10,8 @@
 		"%%DJ%%, %%USER%% is really enjoying this track!",
 		"%%DJ%%, %%USER%% is dancing his feet off to this track!",
 		'%%DJ%% DUDE, this is awesome!" -from %%USER%%',
-		"%%DJ%% That's a banger! -%%USER%%"
+		"%%DJ%% That's a banger! -%%USER%%",
+		"%%DJ%% thanks to you %%USER%% is an absolute fan of this music!"
 	];
 	const propsStrings = [
 		"%%DJ%% Aye mate, %%USER%% wants to set sails with you 👍",
@@ -949,7 +950,7 @@
 					var string = tuneStrings[Math.floor(Math.random()*tuneStrings.length)];
 
 					// Self tuning your own track are you ?
-					if (users.dj === users.user) return API.sendChat('/me Le bloc opératoire N°404 est disponible pour une ablation de côtes ' + users.dj + '.');
+					if (users.dj.substr(1) === users.user) return API.sendChat('/me Le bloc opératoire N°404 est disponible pour une ablation de côtes ' + users.dj + '.');
 
 					for (var key in users) {
 						string = string.split('%%'+key.toUpperCase()+'%%').join(users[key]);
@@ -973,7 +974,7 @@
 					var string = propsStrings[Math.floor(Math.random()*propsStrings.length)];
 
 					// Self proping are you ?
-					if (users.dj === users.user) return API.sendChat(`/me You shall not give yourself props ${users.dj}.`);
+					if (users.dj.substr(1) === users.user) return API.sendChat(`/me You shall not give yourself props ${users.dj}.`);
 
 					for (var key in users) {
 						string = string.split('%%'+key.toUpperCase()+'%%').join(users[key]);
