@@ -1433,16 +1433,16 @@
 		autodisable: false,
 		commandCooldown: 5,
 		usercommandsEnabled: true,
-		thorCommand: true,
+		thorCommand: false,
 		thorCooldown: 15,
 		skipPosition: 2,
 		skipReasons: [
-			["history",     "This song is in the DJ history."],
-			["sound",       "The song you played had bad sound quality or no sound."],
-			["indispo",     "The song you played was not available for some users. "],
-			["troll",       "We do not allow this type of music/video."],
-			["nsfw",        "The song you played contained not safe for work content."],
-			["outro",       "The song you played had a long/irrelevant outro."]
+			["history",  "This song is in the DJ history."],
+			["sound",    "The song you played had bad sound quality or no sound."],
+			["indispo",  "The song you played was not available for some users. "],
+			["troll",    "We do not allow this type of music/video."],
+			["nsfw",     "The song you played contained not safe for work content."],
+			["outro",    "The song you played had a long/irrelevant outro."]
 		],
 		motdEnabled: false,
 		motdInterval: 5,
