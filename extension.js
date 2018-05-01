@@ -127,6 +127,24 @@
 			});
 		}
 	};
+	API.moderateMoveDJ = (ID, pos) => {
+		API.enabled &&
+		API.hasPermission(null, API.ROLE.MANAGER) &&
+		pos >= 0 && pos <= API.getWaitList().length &&
+		API.getUser(ID).id &&
+		API.getWaitListPosition(ID) + 1 !== pos &&
+		$.ajax({
+			url: '/_/booth/move',
+			type: 'POST',
+			data: JSON.stringify({
+				position: pos-1,
+				userID: ID
+			}),
+			error: (err) => console.error(err),
+			dataType: 'json',
+			contentType: 'application/json'
+		});
+	};
 	Number.prototype.spaceOut = function() {
 		if (isNaN(this) || this < 999) return this;
 		return (this).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
