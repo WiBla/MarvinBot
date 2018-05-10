@@ -773,7 +773,7 @@
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
-					API.sendChat('This image will get you started on plug: https://i.imgur.com/ZeRR07N.png');
+					API.sendChat(subChat(bot.chat.starterHelp, {link: "https://i.imgur.com/1Y0nvoq.jpg"}));
 				}
 			}
 		};
