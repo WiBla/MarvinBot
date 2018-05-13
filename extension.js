@@ -773,7 +773,7 @@
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void (0);
 				if (!bot.commands.executable(this.rank, chat)) return void (0);
 				else {
-					API.sendChat(subChat(bot.chat.starterHelp, {link: "https://i.imgur.com/1Y0nvoq.jpg"}));
+					API.sendChat(subChat(bot.chat.starterhelp, {link: "https://i.imgur.com/1Y0nvoq.jpg"}));
 				}
 			}
 		};
@@ -1125,7 +1125,7 @@
 			if (typeof bot.room.autoskipTimer !== 'undefined') clearTimeout(bot.room.autoskipTimer);
 			// Check if a song is playing and woot
 			if (typeof obj.media === 'undefined') return;
-			if (bot.settings.autowoot) $('#woot').click();
+			if (bot.settings.autowoot) $('.fa-thumbs-up').click();
 
 			for (var i = 0; i < bot.room.users.length; i++) {
 				if (bot.room.users[i].id === obj.dj.id) {
