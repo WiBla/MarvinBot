@@ -785,7 +785,7 @@
 				if (this.type === 'exact' && chat.message.length !== cmd.length) return void(0);
 				if (!bot.commands.executable(this.rank, chat)) return void(0);
 				else {
-					$("#meh").click();
+					$('.btn-meh').click();
 					API.sendChat('http://i.imgur.com/NGpjdvp.gif');
 				}
 			}
@@ -1125,7 +1125,7 @@
 			if (typeof bot.room.autoskipTimer !== 'undefined') clearTimeout(bot.room.autoskipTimer);
 			// Check if a song is playing and woot
 			if (typeof obj.media === 'undefined') return;
-			if (bot.settings.autowoot) $('.fa-thumbs-up').click();
+			if (bot.settings.autowoot) $('.btn-like').click();
 
 			for (var i = 0; i < bot.room.users.length; i++) {
 				if (bot.room.users[i].id === obj.dj.id) {
@@ -1478,13 +1478,13 @@
 		website: "http://wibla.free.fr/plug",
 		intervalMessages: [
 			"Give the !loto a try, you can win up to 75k PP daily!! :gift:",
-			"Our favorite autowoot https://github.com/Plug-It",
+			"Our favorite autowoot https://gg.gg/pi-extension",
 			"https://i.imgur.com/ji5Uzkg.gif Remember to put the room in your favorite if we deserve it! ♥",
 			":warning: If your songs has more than 5 mehs, it will be skipped!",
 			"Invite your friends! The more people, the more fun!",
 			"You can play music up to 7min 30sec. After that, it will be skipped!",
 			"Feel free to use !tune or !props whenever you hear a banging tune!",
-			"Try to shuffle your playlists as much as possible, here's a great script for it: https://plugmixer.sunwj.com/"
+			"Avoid playing the same thing all the time and shuffle your playlist :)"
 		],
 		messageInterval: 10,
 		songstats: false,
