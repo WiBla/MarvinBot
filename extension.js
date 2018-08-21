@@ -266,7 +266,12 @@
 		'paper',
 		'mysterious',
 		'sphinx',
-		'egypt'
+		'egypt',
+		'cryotherapy',
+		'geranium',
+		'cryptography',
+		'citrus',
+		'nymph'
 	];
 	const abc = 'abcdefghijklmnopqrstuvwxyz';
 	var penduActive = false;
@@ -1210,7 +1215,7 @@
 			}, 2000);
 			setTimeout(function() {
 				let limit = bot.settings.maximumSongLength*60;
-				if (bot.settings.timeGuard && newMedia.duration > limit && !bot.room.roomevent) {
+				if (bot.settings.timeGuard && !bot.settings.strictTimeGuard && newMedia.duration > limit && !bot.room.roomevent) {
 					API.sendChat(`Song is longer than ${Math.floor(limit/60)}min ${limit%60}s, skipping after the limit.`);
 					setTimeout(function(data) {
 						// Is it still the same music or has it been skipped already ?
@@ -1447,6 +1452,7 @@
 		voteSkipLimit: 5,
 		historySkip: true,
 		timeGuard: true,
+		strictTimeGuard: false,
 		maximumSongLength: 7.5,
 		autodisable: false,
 		commandCooldown: 5,
